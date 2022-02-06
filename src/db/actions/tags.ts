@@ -1,6 +1,6 @@
 import { QueryResult } from 'pg';
 import { Tag } from 'src/core/tags';
-import { Database } from 'src/core/database';
+import { Database, DbPage } from 'src/core/database';
 import { DbInstance } from '../types';
 
 const getTag =
@@ -8,16 +8,21 @@ const getTag =
   async (id) => {
     logger.debug(`Getting tag: ${id}`);
     const tag: QueryResult<Tag> = await pool.query(queries.tags.select, [id]);
-    return tag.rows[0];
+    return tag.rows[0] || {};
   };
 
 const getAllTags =
   ({ logger, pool, queries }: DbInstance): Database['tags']['getAll'] =>
   async (offset, limit) => {
     logger.debug(`Getting tag list ${limit} ${offset}`);
-    const tags: QueryResult<Tag> = await pool.query(queries.tags.selectAll, [limit, offset]);
-    logger.debug(tags);
-    return tags.rows;
+    const tags: QueryResult<DbPage<Tag>> = await pool.query(queries.tags.selectAll, [
+      limit,
+      offset,
+    ]);
+
+    const { count = 0, rows } = tags.rows[0] || {};
+
+    return { count, data: rows || [], next: (limit || 0) + offset < count };
   };
 
 const addTag =
@@ -26,7 +31,7 @@ const addTag =
     logger.debug(`Adding tag: ${name}`);
     const tag: QueryResult<Tag> = await pool.query(queries.tags.insert, [name]);
 
-    return tag.rows[0];
+    return tag.rows[0] || {};
   };
 
 const updateTag =
@@ -35,7 +40,7 @@ const updateTag =
     logger.debug(`Updating tag: ${name}`);
     const tag: QueryResult<Tag> = await pool.query(queries.tags.update, [name, id]);
 
-    return tag.rows[0];
+    return tag.rows[0] || {};
   };
 
 const removeTag =

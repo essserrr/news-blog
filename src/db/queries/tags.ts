@@ -13,7 +13,7 @@ const tags = {
     );
 
     CREATE UNIQUE INDEX IF NOT EXISTS ${TagsTable.NAME}_lower_unique  ON ${Tables.TAGS} (lower(${TagsTable.NAME}));
-    CREATE INDEX IF NOT EXISTS ${TagsTable.ID}_asc_index ON ${Tables.TAGS} (${TagsTable.ID} ASC);
+    CREATE INDEX IF NOT EXISTS ${TagsTable.ID}_asc_index ON ${Tables.TAGS} USING btree (${TagsTable.ID} ASC);
 `,
 
   insert: `INSERT INTO ${Tables.TAGS}(${TagsTable.NAME}) VALUES ($1) RETURNING *;`,
@@ -22,7 +22,17 @@ const tags = {
 
   delete: `DELETE FROM ${Tables.TAGS}	WHERE ${TagsTable.ID}=$1;`,
 
-  selectAll: `SELECT * FROM ${Tables.TAGS} ORDER BY ${TagsTable.ID} ASC LIMIT $1 OFFSET $2;`,
+  selectAll: `
+    SELECT
+      (SELECT COUNT(*) FROM ${Tables.TAGS}) as count, 
+      (SELECT json_agg(t.*) 
+        FROM (
+          SELECT * FROM ${Tables.TAGS}
+          ORDER BY ${TagsTable.ID} ASC 
+          LIMIT $1 
+          OFFSET $2
+        ) AS t
+      ) AS rows;`,
 
   select: `SELECT * FROM ${Tables.TAGS} WHERE ${TagsTable.ID}=$1;`,
 } as const;

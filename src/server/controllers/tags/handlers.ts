@@ -32,7 +32,7 @@ const getAll: Handler = (app) => async (req, res) => {
     const validatedOffset = validateOffset(offset);
     const validatedLimit = validateLimit(limit);
 
-    const data = (await app.db.tags.getAll(validatedOffset, validatedLimit)) || [];
+    const data = await app.db.tags.getAll(validatedOffset, validatedLimit);
     res.send({ data });
   } catch (e) {
     app.logger.error(e);
@@ -43,7 +43,7 @@ const getAll: Handler = (app) => async (req, res) => {
 const get: Handler = (app) => async (req, res) => {
   try {
     const id = validateId(req.params.id);
-    const data = (await app.db.tags.get(id)) || {};
+    const data = await app.db.tags.get(id);
     res.send({ data });
   } catch (e) {
     app.logger.error(e);
@@ -54,7 +54,7 @@ const get: Handler = (app) => async (req, res) => {
 const add: Handler = (app) => async (req, res) => {
   try {
     const name = validateName(req.params.id);
-    const data = (await app.db.tags.add(name)) || {};
+    const data = await app.db.tags.add(name);
     res.send({ data });
   } catch (e) {
     app.logger.error(e);
@@ -68,7 +68,7 @@ const update: Handler = (app) => async (req, res) => {
     const { name }: TagUpdate = req.body;
     const validatedName = validateName(name);
 
-    const data = (await app.db.tags.update(id, validatedName)) || {};
+    const data = await app.db.tags.update(id, validatedName);
     res.send({ data });
   } catch (e) {
     app.logger.error(e);
@@ -80,7 +80,7 @@ const remove: Handler = (app) => async (req, res) => {
   try {
     const id = validateId(req.params.id);
 
-    const data = (await app.db.tags.remove(id)) || {};
+    const data = await app.db.tags.remove(id);
     res.send({ data });
   } catch (e) {
     app.logger.error(e);
