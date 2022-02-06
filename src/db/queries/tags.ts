@@ -22,9 +22,9 @@ const tags = {
 
   delete: `DELETE FROM ${Tables.TAGS}	WHERE ${TagsTable.ID}=$1;`,
 
-  selectAll: `SELECT * FROM ${Tables.TAGS} ORDER BY ${TagsTable.ID} ASC;`,
+  selectAll: `SELECT * FROM ${Tables.TAGS} ORDER BY ${TagsTable.ID} ASC LIMIT $1 OFFSET $2;`,
 
-  select: `SELECT * FROM ${Tables.TAGS} WHERE ${TagsTable.ID}=$1`,
+  select: `SELECT * FROM ${Tables.TAGS} WHERE ${TagsTable.ID}=$1;`,
 } as const;
 
 export { TagsTable, tags };

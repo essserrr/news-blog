@@ -13,9 +13,10 @@ const getTag =
 
 const getAllTags =
   ({ logger, pool, queries }: DbInstance): Database['tags']['getAll'] =>
-  async () => {
-    logger.debug('Getting tag list');
-    const tags: QueryResult<Tag> = await pool.query(queries.tags.selectAll);
+  async (offset, limit) => {
+    logger.debug(`Getting tag list ${limit} ${offset}`);
+    const tags: QueryResult<Tag> = await pool.query(queries.tags.selectAll, [limit, offset]);
+    logger.debug(tags);
     return tags.rows;
   };
 
