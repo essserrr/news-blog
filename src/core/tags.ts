@@ -3,4 +3,6 @@ interface Tag {
   name: string;
 }
 
-export type { Tag };
+type TagUpdate = Pick<Tag, 'name'>;
+
+export type { Tag, TagUpdate };

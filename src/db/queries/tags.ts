@@ -14,9 +14,9 @@ const tags = {
     CREATE UNIQUE INDEX IF NOT EXISTS ${TagsTable.NAME}_lower_unique 
         ON ${Tables.TAGS} (lower(${TagsTable.NAME}));`,
 
-  insert: `INSERT INTO ${Tables.TAGS}(${TagsTable.NAME}) VALUES ($1);`,
+  insert: `INSERT INTO ${Tables.TAGS}(${TagsTable.NAME}) VALUES ($1) RETURNING *;`,
 
-  update: `UPDATE ${Tables.TAGS} SET ${TagsTable.NAME}=$1 WHERE ${TagsTable.ID}=$2;`,
+  update: `UPDATE ${Tables.TAGS} SET ${TagsTable.NAME}=$1 WHERE ${TagsTable.ID}=$2 RETURNING *;`,
 
   delete: `DELETE FROM ${Tables.TAGS}	WHERE ${TagsTable.ID}=$1;`,
 

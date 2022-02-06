@@ -19,5 +19,6 @@ module.exports = {
   rules: {
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'import/prefer-default-export': ['off'],
+    'prefer-destructuring': ['off'],
   },
 };

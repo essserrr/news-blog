@@ -9,6 +9,8 @@ interface InitServerProps {
 const initServer = ({ app }: InitServerProps) => {
   const server = express();
 
+  server.use(express.json());
+
   server.use('/tags', initTagRouter(app));
 
   return server;

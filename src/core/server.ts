@@ -1,4 +1,10 @@
 import { RequestHandler } from 'express';
 import { App } from 'src/core/app';
 
-export type Handler = (app: App) => RequestHandler;
+type Handler = (app: App) => RequestHandler;
+
+interface MessageResponse {
+  message: string;
+}
+
+export type { Handler, MessageResponse };
