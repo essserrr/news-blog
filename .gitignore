@@ -1,0 +1,8 @@
+﻿*.env
+node_modules
+dist
+.env.start
+.env.dev
+users.csv
+users-transformed.csv
+coverage
