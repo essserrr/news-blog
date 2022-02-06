@@ -22,7 +22,7 @@ const tags = {
 
   selectAll: `SELECT * FROM ${Tables.TAGS};`,
 
-  select: `SELECT * FROM ${Tables.TAGS}WHERE ${TagsTable.ID}=$1`,
+  select: `SELECT * FROM ${Tables.TAGS} WHERE ${TagsTable.ID}=$1`,
 } as const;
 
 export { TagsTable, tags };
