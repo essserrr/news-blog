@@ -1,5 +1,7 @@
 import { RequestHandler, Request } from 'express';
 import { AuthStatus } from 'src/core/auth';
+import { respondWithError } from 'src/core/server';
+import { AppError } from 'src/core/errors';
 import { App } from 'src/core/app';
 
 type AuthMiddleware = (app: App, allowed: NoAuthMethods) => RequestHandler;
@@ -12,16 +14,24 @@ const login = async (app: App, req: Request): Promise<AuthStatus> => {
 };
 
 const loginAdminMiddleware: AuthMiddleware = (app, allowed) => async (req, res, next) => {
-  if (allowed[req.method]) {
-    next();
-  } else {
-    const auth = await login(app, req);
-    if (auth.isAdmin && auth.loggedIn) {
-      res.locals.auth = auth;
+  try {
+    if (allowed[req.method]) {
       next();
-    } else {
-      res.sendStatus(404);
+      return;
     }
+
+    const auth = await login(app, req);
+    if (!auth.isAdmin || !auth.loggedIn)
+      throw new AppError({ code: 'FORBIDDEN', errorType: 'Admin auth error' });
+
+    res.locals.auth = auth;
+    next();
+  } catch (e) {
+    respondWithError(
+      app,
+      res,
+      new AppError({ code: 'FORBIDDEN', errorType: 'Admin auth error', originalError: e }),
+    );
   }
 };
 

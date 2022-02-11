@@ -1,6 +1,7 @@
-import { Handler } from 'src/core/server';
+import { Handler, respondWithError } from 'src/core/server';
 import { Limit, Offset } from 'src/core/database';
 import { TagUpdate } from 'src/core/tags';
+import { getTypedError } from 'src/core/errors';
 
 const validateId = (id: unknown): string => {
   if (!id || typeof id !== 'string') throw new Error('Wrong Id');
@@ -46,8 +47,7 @@ const get: Handler = (app) => async (req, res) => {
     const data = await app.db.tags.get(id);
     res.send({ data });
   } catch (e) {
-    app.logger.error(e);
-    res.sendStatus(500);
+    respondWithError(app, res, getTypedError(e));
   }
 };
 
@@ -57,8 +57,7 @@ const add: Handler = (app) => async (req, res) => {
     const data = await app.db.tags.add(name);
     res.send({ data });
   } catch (e) {
-    app.logger.error(e);
-    res.sendStatus(500);
+    respondWithError(app, res, getTypedError(e));
   }
 };
 
@@ -71,8 +70,7 @@ const update: Handler = (app) => async (req, res) => {
     const data = await app.db.tags.update(id, validatedName);
     res.send({ data });
   } catch (e) {
-    app.logger.error(e);
-    res.sendStatus(500);
+    respondWithError(app, res, getTypedError(e));
   }
 };
 
@@ -81,10 +79,9 @@ const remove: Handler = (app) => async (req, res) => {
     const id = validateId(req.params.id);
 
     const data = await app.db.tags.remove(id);
-    res.send({ data });
+    res.send(data);
   } catch (e) {
-    app.logger.error(e);
-    res.sendStatus(500);
+    respondWithError(app, res, getTypedError(e));
   }
 };
 
