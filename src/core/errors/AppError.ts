@@ -1,9 +1,15 @@
 import { databaseErrorHttpErrors, DatabaseErrorCodes } from './database-errors';
 import { authErrorHttpCodes, AuthErrorCodes } from './auth-errors';
 import { generalErrorHttpCode, GeneralErrorCodes } from './general-errors';
+import { ValidationErrorCodes, validationErrorHttpCodes } from './validation-error';
 
-type ErrorTypes = 'Database error' | 'App error' | 'Auth error' | 'Admin auth error';
-type AppErrorCodes = GeneralErrorCodes | DatabaseErrorCodes | AuthErrorCodes;
+type ErrorTypes =
+  | 'Database error'
+  | 'App error'
+  | 'Auth error'
+  | 'Admin auth error'
+  | 'Validation error';
+type AppErrorCodes = GeneralErrorCodes | DatabaseErrorCodes | AuthErrorCodes | ValidationErrorCodes;
 
 const errorStrings: Record<AppErrorCodes, string> = {
   NOT_FOUND: 'Not found',
@@ -11,12 +17,14 @@ const errorStrings: Record<AppErrorCodes, string> = {
   NAME_CONFLICT: 'Names conflict',
   FORBIDDEN: 'Access forbidden',
   UNAUTHORIZED: 'Authorization needed',
+  WRONG_FORMAT: 'Wrong request format',
 };
 
 const appErrorHttpCodes = {
   ...generalErrorHttpCode,
   ...databaseErrorHttpErrors,
   ...authErrorHttpCodes,
+  ...validationErrorHttpCodes,
 };
 
 interface IAppErrorProps {

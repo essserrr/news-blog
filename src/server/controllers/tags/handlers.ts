@@ -1,30 +1,7 @@
 import { Handler, respondWithError } from 'src/core/server';
-import { Limit, Offset } from 'src/core/database';
 import { TagUpdate } from 'src/core/tags';
 import { getTypedError } from 'src/core/errors';
-
-const validateId = (id: unknown): string => {
-  if (!id || typeof id !== 'string') throw new Error('Wrong Id');
-  return id;
-};
-
-const validateName = (name: unknown): string => {
-  if (!name || typeof name !== 'string') throw new Error('Wrong name');
-  return name;
-};
-
-const validateOffset = (num: unknown): Offset => {
-  const numParsed = Number(num);
-  if (Number.isNaN(numParsed)) throw new Error('Wrong offset');
-  return numParsed;
-};
-
-const validateLimit = (num: unknown): Limit => {
-  if (num === null) return num;
-  const numParsed = Number(num);
-  if (Number.isNaN(numParsed)) throw new Error('Wrong limit');
-  return numParsed;
-};
+import { validateId, validateName, validateLimit, validateOffset } from 'src/core/validation';
 
 const getAll: Handler = (app) => async (req, res) => {
   try {

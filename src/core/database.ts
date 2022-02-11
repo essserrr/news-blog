@@ -18,9 +18,9 @@ type PaginatedResult<T> = {
 interface Database {
   tags: {
     add: (name: string) => Promise<Tag>;
-    update: (id: string, name: string) => Promise<Tag>;
-    remove: (id: string) => Promise<MessageResponse>;
-    get: (id: string) => Promise<Tag>;
+    update: (id: number, name: string) => Promise<Tag>;
+    remove: (id: number) => Promise<MessageResponse>;
+    get: (id: number) => Promise<Tag>;
     getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Tag>>;
   };
 }
