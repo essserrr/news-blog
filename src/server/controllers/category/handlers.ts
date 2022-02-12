@@ -1,5 +1,5 @@
 import { Handler, respondWithError } from 'src/core/server';
-import { CategoryUpdate } from 'src/core/categories';
+import { CategoryUpdateBody, CategoryInsertBody } from 'src/core/categories';
 import { getTypedError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 
@@ -30,8 +30,11 @@ const add: Handler = (app) => async (req, res) => {
   try {
     const { name } = validateReq({ name: req.params.id });
 
-    const { pid }: CategoryUpdate = req.body;
-    const { name: validatedName, pid: validatedPid } = validateReq({ name, pid });
+    const { pid }: CategoryInsertBody = req.body;
+    const { name: validatedName, pid: validatedPid } = validateReq({
+      name,
+      pid,
+    });
 
     const data = await app.db.categories.add({ name: validatedName, pid: validatedPid });
 
@@ -45,8 +48,11 @@ const update: Handler = (app) => async (req, res) => {
   try {
     const { id } = validateQuery({ id: req.params.id });
 
-    const { name, pid }: CategoryUpdate = req.body;
-    const { name: validatedName, pid: validatedPid } = validateReq({ name, pid });
+    const { name, pid }: CategoryUpdateBody = req.body;
+    const { optionalName: validatedName, optionalPid: validatedPid } = validateReq({
+      optionalName: name,
+      optionalPid: pid,
+    });
 
     const data = await app.db.categories.update(id, { name: validatedName, pid: validatedPid });
     res.send({ data });

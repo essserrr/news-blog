@@ -42,9 +42,9 @@ const addCategory =
 
 const updateCategory =
   ({ logger, pool, queries }: DbInstance): Database['categories']['update'] =>
-  async (id, { name }) => {
+  async (id, { name, pid }) => {
     logger.debug(`Updating category: ${name}`);
-    const res: QueryResult<Category> = await pool.query(queries.categories.update, [id, name]);
+    const res: QueryResult<Category> = await pool.query(queries.categories.update, [id, name, pid]);
 
     const category = res.rows[0];
     if (!category) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });

@@ -1,6 +1,6 @@
 import type { MessageResponse } from 'src/core/server';
 import { Tag, TagUpdate } from './tags';
-import { Category, CategoryUpdate } from './categories';
+import { Category, CategoryUpdate, CategoryInsert } from './categories';
 
 type Offset = number;
 type Limit = number | null;
@@ -25,7 +25,7 @@ interface Database {
     getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Tag>>;
   };
   categories: {
-    add: (options: CategoryUpdate) => Promise<Category>;
+    add: (options: CategoryInsert) => Promise<Category>;
     update: (id: number, options: CategoryUpdate) => Promise<Category>;
     remove: (id: number) => Promise<MessageResponse>;
     get: (id: number) => Promise<Category>;

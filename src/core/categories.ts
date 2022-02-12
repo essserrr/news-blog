@@ -4,6 +4,14 @@ interface Category {
   name: string;
 }
 
-type CategoryUpdate = Omit<Category, 'id'>;
+type CategoryWithoutId = Omit<Category, 'id'>;
 
-export type { Category, CategoryUpdate };
+type CategoryInsert = CategoryWithoutId;
+type CategoryInsertBody = Omit<CategoryWithoutId, 'name'>;
+
+type UpdateRequest<T> = { [K in keyof T]: null extends T[K] ? T[K] | '(null_value)' : T[K] | null };
+
+type CategoryUpdate = UpdateRequest<CategoryWithoutId>;
+type CategoryUpdateBody = Partial<CategoryWithoutId>;
+
+export type { Category, CategoryUpdate, CategoryUpdateBody, CategoryInsert, CategoryInsertBody };

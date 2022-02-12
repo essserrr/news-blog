@@ -26,7 +26,15 @@ const categories = {
 
   insert: `INSERT INTO ${Tables.CATEGORIES}(${CategoriesTable.NAME}, ${CategoriesTable.PID}) VALUES ($1, $2) RETURNING *;`,
 
-  update: `UPDATE ${Tables.CATEGORIES} SET ${CategoriesTable.NAME}=$2 WHERE ${CategoriesTable.ID}=$1 RETURNING *;`,
+  update: `
+  UPDATE ${Tables.CATEGORIES}
+    SET 
+        ${CategoriesTable.NAME} = COALESCE($2, ${CategoriesTable.NAME}),
+        ${CategoriesTable.PID} =  CASE 
+                                    WHEN $3='(null_value)' THEN NULL
+                                    ELSE COALESCE($3::integer, ${CategoriesTable.PID})
+                                  END
+    WHERE ${CategoriesTable.ID}=$1 RETURNING *;`,
 
   delete: `DELETE FROM ${Tables.CATEGORIES}	WHERE ${CategoriesTable.ID}=$1;`,
 
