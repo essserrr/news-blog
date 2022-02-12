@@ -5,14 +5,19 @@ enum TagsTable {
   NAME = 'name',
 }
 
+enum TagRules {
+  UNIQUE_NAME = 'tags_name_unique',
+  SORT_BY_ID = 'tags_id_sort_asc',
+}
+
 const tags = {
   createTagsTable: `CREATE TABLE IF NOT EXISTS ${Tables.TAGS}(
         ${TagsTable.ID} serial NOT NULL PRIMARY KEY,
         ${TagsTable.NAME} text NOT NULL
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS ${TagsTable.NAME}_lower_unique  ON ${Tables.TAGS} (lower(${TagsTable.NAME}));
-    CREATE INDEX IF NOT EXISTS ${TagsTable.ID}_asc_index ON ${Tables.TAGS} USING btree (${TagsTable.ID} ASC);
+    CREATE UNIQUE INDEX IF NOT EXISTS ${TagRules.UNIQUE_NAME}  ON ${Tables.TAGS} (lower(${TagsTable.NAME}));
+    CREATE INDEX IF NOT EXISTS ${TagRules.SORT_BY_ID} ON ${Tables.TAGS} USING btree (${TagsTable.ID} ASC);
 `,
 
   insert: `INSERT INTO ${Tables.TAGS}(${TagsTable.NAME}) VALUES ($1) RETURNING *;`,
@@ -36,4 +41,4 @@ const tags = {
   select: `SELECT * FROM ${Tables.TAGS} WHERE ${TagsTable.ID}=$1;`,
 } as const;
 
-export { TagsTable, tags };
+export { TagsTable, TagRules, tags };

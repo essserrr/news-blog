@@ -6,13 +6,10 @@ enum CategoriesTable {
   NAME = 'name',
 }
 
-enum CategoriesConstraints {
-  NAME = 'name_lower_unique',
-  PID = 'correct_pid',
-}
-
-enum CategoriesIndexes {
-  ID = 'id_asc_index',
+enum CategoryRules {
+  UNIQUE_NAME = 'categories_name_unique',
+  PROPER_PID = 'categories_pid_proper',
+  SORT_BY_ID = 'categories_id_sort_asc',
 }
 
 const categories = {
@@ -20,11 +17,11 @@ const categories = {
         ${CategoriesTable.ID} serial NOT NULL PRIMARY KEY,
         ${CategoriesTable.PID} integer REFERENCES ${Tables.CATEGORIES} (${CategoriesTable.ID}) ON DELETE CASCADE,
         ${CategoriesTable.NAME} text NOT NULL, 
-        CONSTRAINT ${CategoriesConstraints.PID} CHECK (${CategoriesTable.PID} <> ${CategoriesTable.ID} AND ${CategoriesTable.PID} > 0)
+        CONSTRAINT ${CategoryRules.PROPER_PID} CHECK (${CategoriesTable.PID} <> ${CategoriesTable.ID} AND ${CategoriesTable.PID} > 0)
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS ${CategoriesConstraints.NAME} ON ${Tables.CATEGORIES} (lower(${CategoriesTable.NAME}));
-    CREATE INDEX IF NOT EXISTS ${CategoriesIndexes.ID} ON ${Tables.CATEGORIES} USING btree (${CategoriesTable.ID} ASC);
+    CREATE UNIQUE INDEX IF NOT EXISTS ${CategoryRules.UNIQUE_NAME} ON ${Tables.CATEGORIES} (lower(${CategoriesTable.NAME}));
+    CREATE INDEX IF NOT EXISTS ${CategoryRules.SORT_BY_ID} ON ${Tables.CATEGORIES} USING btree (${CategoriesTable.ID} ASC);
 `,
 
   insert: `INSERT INTO ${Tables.CATEGORIES}(${CategoriesTable.NAME}, ${CategoriesTable.PID}) VALUES ($1, $2) RETURNING *;`,
@@ -48,4 +45,4 @@ const categories = {
   select: `SELECT * FROM ${Tables.CATEGORIES} WHERE ${CategoriesTable.ID}=$1;`,
 } as const;
 
-export { CategoriesTable, categories };
+export { CategoriesTable, CategoryRules, categories };

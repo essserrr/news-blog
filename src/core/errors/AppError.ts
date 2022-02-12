@@ -18,6 +18,7 @@ const errorStrings: Record<AppErrorCodes, string> = {
   FORBIDDEN: 'Access forbidden',
   UNAUTHORIZED: 'Authorization needed',
   WRONG_FORMAT: 'Wrong request format',
+  WRONG_REFERENCE: 'Wrong reference',
 };
 
 const appErrorHttpCodes = {

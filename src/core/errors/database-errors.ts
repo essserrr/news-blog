@@ -1,5 +1,12 @@
-type DatabaseErrorCodes = 'NAME_CONFLICT';
-type KnownConstraints = 'name_lower_unique';
+import { TagRules } from 'src/db/queries/tags';
+import { CategoryRules } from 'src/db/queries/categories';
+
+type DatabaseErrorCodes = 'NAME_CONFLICT' | 'WRONG_REFERENCE';
+type KnownConstraints =
+  | 'categories_pid_fkey'
+  | CategoryRules.PROPER_PID
+  | CategoryRules.UNIQUE_NAME
+  | TagRules.UNIQUE_NAME;
 
 interface IDatabaseError {
   message: string;
@@ -18,10 +25,15 @@ interface IDatabaseError {
 
 const databaseDictionary: Record<string, DatabaseErrorCodes> = {
   '23505': 'NAME_CONFLICT',
+  '23503': 'WRONG_REFERENCE',
+  '23514': 'WRONG_REFERENCE',
 };
 
 const constraintsDictionary: Record<string, KnownConstraints> = {
-  name_lower_unique: 'name_lower_unique',
+  categories_pid_fkey: 'categories_pid_fkey',
+  [CategoryRules.PROPER_PID]: CategoryRules.PROPER_PID,
+  [CategoryRules.UNIQUE_NAME]: CategoryRules.UNIQUE_NAME,
+  [TagRules.UNIQUE_NAME]: TagRules.UNIQUE_NAME,
 };
 
 const isDatabaseError = (e: any): e is IDatabaseError => {
@@ -30,7 +42,10 @@ const isDatabaseError = (e: any): e is IDatabaseError => {
   return true;
 };
 
-const databaseErrorHttpErrors: Record<DatabaseErrorCodes, number> = { NAME_CONFLICT: 409 };
+const databaseErrorHttpErrors: Record<DatabaseErrorCodes, number> = {
+  NAME_CONFLICT: 409,
+  WRONG_REFERENCE: 400,
+};
 
 export type { DatabaseErrorCodes, IDatabaseError };
 export { constraintsDictionary, databaseDictionary, isDatabaseError, databaseErrorHttpErrors };

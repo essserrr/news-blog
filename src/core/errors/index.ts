@@ -1,8 +1,8 @@
 import {
   databaseDictionary,
-  constraintsDictionary,
   IDatabaseError,
   isDatabaseError,
+  constraintsDictionary,
 } from './database-errors';
 import { AppError, AppErrorCodes, isAppError } from './AppError';
 

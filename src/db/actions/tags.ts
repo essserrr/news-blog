@@ -28,7 +28,7 @@ const getAllTags =
 
 const addTag =
   ({ logger, pool, queries }: DbInstance): Database['tags']['add'] =>
-  async (name) => {
+  async ({ name }) => {
     logger.debug(`Adding tag: ${name}`);
     const res: QueryResult<Tag> = await pool.query(queries.tags.insert, [name]);
 
@@ -39,7 +39,7 @@ const addTag =
 
 const updateTag =
   ({ logger, pool, queries }: DbInstance): Database['tags']['update'] =>
-  async (id, name) => {
+  async (id, { name }) => {
     logger.debug(`Updating tag: ${name}`);
     const res: QueryResult<Tag> = await pool.query(queries.tags.update, [id, name]);
 
