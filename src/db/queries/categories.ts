@@ -51,6 +51,21 @@ const categories = {
       ) AS rows;`,
 
   select: `SELECT * FROM ${Tables.CATEGORIES} WHERE ${CategoriesTable.ID}=$1;`,
+
+  selectRecursively: `
+  WITH RECURSIVE r AS (
+    SELECT ${CategoriesTable.ID}, ${CategoriesTable.PID}, ${CategoriesTable.NAME}, 1 AS level
+    FROM ${Tables.CATEGORIES}
+    WHERE ${CategoriesTable.ID} = $1
+  
+    UNION ALL
+  
+    SELECT ${Tables.CATEGORIES}.${CategoriesTable.ID}, ${Tables.CATEGORIES}.${CategoriesTable.PID}, ${Tables.CATEGORIES}.${CategoriesTable.NAME}, r.level + 1 AS level
+    FROM ${Tables.CATEGORIES}
+      JOIN r ON ${Tables.CATEGORIES}.${CategoriesTable.ID} = r.${CategoriesTable.PID}
+  )
+  SELECT * FROM r;
+  `,
 } as const;
 
 export { CategoriesTable, CategoryRules, categories };
