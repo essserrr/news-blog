@@ -41,7 +41,7 @@ const updateTag =
   ({ logger, pool, queries }: DbInstance): Database['tags']['update'] =>
   async (id, name) => {
     logger.debug(`Updating tag: ${name}`);
-    const res: QueryResult<Tag> = await pool.query(queries.tags.update, [name, id]);
+    const res: QueryResult<Tag> = await pool.query(queries.tags.update, [id, name]);
 
     const tag = res.rows[0];
     if (!tag) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });

@@ -7,9 +7,8 @@ enum TagsTable {
 
 const tags = {
   createTagsTable: `CREATE TABLE IF NOT EXISTS ${Tables.TAGS}(
-        ${TagsTable.ID} serial NOT NULL,
-        ${TagsTable.NAME} text NOT NULL,
-        PRIMARY KEY (${TagsTable.ID})
+        ${TagsTable.ID} serial NOT NULL PRIMARY KEY,
+        ${TagsTable.NAME} text NOT NULL
     );
 
     CREATE UNIQUE INDEX IF NOT EXISTS ${TagsTable.NAME}_lower_unique  ON ${Tables.TAGS} (lower(${TagsTable.NAME}));
@@ -18,7 +17,7 @@ const tags = {
 
   insert: `INSERT INTO ${Tables.TAGS}(${TagsTable.NAME}) VALUES ($1) RETURNING *;`,
 
-  update: `UPDATE ${Tables.TAGS} SET ${TagsTable.NAME}=$1 WHERE ${TagsTable.ID}=$2 RETURNING *;`,
+  update: `UPDATE ${Tables.TAGS} SET ${TagsTable.NAME}=$2 WHERE ${TagsTable.ID}=$1 RETURNING *;`,
 
   delete: `DELETE FROM ${Tables.TAGS}	WHERE ${TagsTable.ID}=$1;`,
 

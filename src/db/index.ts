@@ -3,6 +3,14 @@ import { Database, DatabaseConfig } from 'src/core/database';
 
 import { initTables, connectDb } from './actions/init';
 import { getAllTags, getTag, addTag, updateTag, removeTag } from './actions/tags';
+import {
+  getAllCategories,
+  getCategory,
+  addCategory,
+  updateCategory,
+  removeCategory,
+} from './actions/categories';
+
 import { DbInstance } from './types';
 import queries from './queries';
 
@@ -25,6 +33,13 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       add: addTag(instance),
       update: updateTag(instance),
       remove: removeTag(instance),
+    },
+    categories: {
+      getAll: getAllCategories(instance),
+      get: getCategory(instance),
+      add: addCategory(instance),
+      update: updateCategory(instance),
+      remove: removeCategory(instance),
     },
   };
 };

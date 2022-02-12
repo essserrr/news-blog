@@ -3,6 +3,6 @@ interface Tag {
   name: string;
 }
 
-type TagUpdate = Pick<Tag, 'name'>;
+type TagUpdate = Omit<Tag, 'id'>;
 
 export type { Tag, TagUpdate };

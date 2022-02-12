@@ -1,5 +1,5 @@
 import { Handler, respondWithError } from 'src/core/server';
-import { TagUpdate } from 'src/core/tags';
+import { CategoryUpdate } from 'src/core/categories';
 import { getTypedError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 
@@ -7,7 +7,7 @@ const getAll: Handler = (app) => async (req, res) => {
   try {
     const { offset = 0, limit = null } = req.query;
     const { offset: validatedOffset, limit: validatedLimit } = validateQuery({ offset, limit });
-    const data = await app.db.tags.getAll(validatedOffset, validatedLimit);
+    const data = await app.db.categories.getAll(validatedOffset, validatedLimit);
 
     res.send({ data });
   } catch (e) {
@@ -18,7 +18,7 @@ const getAll: Handler = (app) => async (req, res) => {
 const get: Handler = (app) => async (req, res) => {
   try {
     const { id } = validateQuery({ id: req.params.id });
-    const data = await app.db.tags.get(id);
+    const data = await app.db.categories.get(id);
 
     res.send({ data });
   } catch (e) {
@@ -29,7 +29,11 @@ const get: Handler = (app) => async (req, res) => {
 const add: Handler = (app) => async (req, res) => {
   try {
     const { name } = validateReq({ name: req.params.id });
-    const data = await app.db.tags.add({ name });
+
+    const { pid }: CategoryUpdate = req.body;
+    const { name: validatedName, pid: validatedPid } = validateReq({ name, pid });
+
+    const data = await app.db.categories.add({ name: validatedName, pid: validatedPid });
 
     res.send({ data });
   } catch (e) {
@@ -41,10 +45,10 @@ const update: Handler = (app) => async (req, res) => {
   try {
     const { id } = validateQuery({ id: req.params.id });
 
-    const { name }: TagUpdate = req.body;
-    const { name: validatedName } = validateReq({ name });
+    const { name, pid }: CategoryUpdate = req.body;
+    const { name: validatedName, pid: validatedPid } = validateReq({ name, pid });
 
-    const data = await app.db.tags.update(id, { name: validatedName });
+    const data = await app.db.categories.update(id, { name: validatedName, pid: validatedPid });
     res.send({ data });
   } catch (e) {
     respondWithError(app, res, getTypedError(e));
@@ -54,7 +58,7 @@ const update: Handler = (app) => async (req, res) => {
 const remove: Handler = (app) => async (req, res) => {
   try {
     const { id } = validateQuery({ id: req.params.id });
-    const data = await app.db.tags.remove(id);
+    const data = await app.db.categories.remove(id);
 
     res.send(data);
   } catch (e) {

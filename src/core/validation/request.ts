@@ -8,12 +8,22 @@ const validateName = (name: unknown): string => {
   return name;
 };
 
+const validatePid = (num: unknown): number | null => {
+  if (num === null || num === 'null') return null;
+  const numParsed = Number(num);
+  if (Number.isNaN(numParsed) || numParsed < 0)
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return numParsed;
+};
+
 const validators = {
   name: validateName,
+  pid: validatePid,
 } as const;
 
 interface ReqRes {
   name: string;
+  pid: number | null;
 }
 
 type ReqParams = NotValidated<ReqRes>;

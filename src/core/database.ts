@@ -1,5 +1,6 @@
 import type { MessageResponse } from 'src/core/server';
-import { Tag } from './tags';
+import { Tag, TagUpdate } from './tags';
+import { Category, CategoryUpdate } from './categories';
 
 type Offset = number;
 type Limit = number | null;
@@ -17,11 +18,18 @@ type PaginatedResult<T> = {
 
 interface Database {
   tags: {
-    add: (name: string) => Promise<Tag>;
-    update: (id: number, name: string) => Promise<Tag>;
+    add: (options: TagUpdate) => Promise<Tag>;
+    update: (id: number, options: TagUpdate) => Promise<Tag>;
     remove: (id: number) => Promise<MessageResponse>;
     get: (id: number) => Promise<Tag>;
     getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Tag>>;
+  };
+  categories: {
+    add: (options: CategoryUpdate) => Promise<Category>;
+    update: (id: number, options: CategoryUpdate) => Promise<Category>;
+    remove: (id: number) => Promise<MessageResponse>;
+    get: (id: number) => Promise<Category>;
+    getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Category>>;
   };
 }
 
