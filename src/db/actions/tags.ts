@@ -21,9 +21,9 @@ const getAllTags =
     logger.debug(`Getting tag list ${limit} ${offset}`);
     const res: QueryResult<DbPage<Tag>> = await pool.query(queries.tags.selectAll, [limit, offset]);
 
-    const { count = 0, rows = [] } = res.rows[0] || {};
+    const { count = 0, rows } = res.rows[0] || {};
 
-    return { count, data: rows, next: (limit || 0) + offset < count };
+    return { count, data: rows || [], next: (limit || 0) + offset < count };
   };
 
 const addTag =
