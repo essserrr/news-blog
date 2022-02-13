@@ -1,12 +1,14 @@
 import { TagRules } from 'src/db/queries/tags';
 import { CategoryRules } from 'src/db/queries/categories';
+import { UserRules } from 'src/db/queries/users';
 
 type DatabaseErrorCodes = 'NAME_CONFLICT' | 'WRONG_REFERENCE';
 type KnownConstraints =
   | 'categories_pid_fkey'
   | CategoryRules.PROPER_PID
   | CategoryRules.UNIQUE_NAME
-  | TagRules.UNIQUE_NAME;
+  | TagRules.UNIQUE_NAME
+  | UserRules.UNIQUE_USERNAME;
 
 interface IDatabaseError {
   message: string;
@@ -34,6 +36,7 @@ const constraintsDictionary: Record<string, KnownConstraints> = {
   [CategoryRules.PROPER_PID]: CategoryRules.PROPER_PID,
   [CategoryRules.UNIQUE_NAME]: CategoryRules.UNIQUE_NAME,
   [TagRules.UNIQUE_NAME]: TagRules.UNIQUE_NAME,
+  [UserRules.UNIQUE_USERNAME]: UserRules.UNIQUE_USERNAME,
 };
 
 const isDatabaseError = (e: any): e is IDatabaseError => {

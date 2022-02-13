@@ -11,7 +11,6 @@ type PaginatedResult<T> = {
 
 type DatabaseOptionalValue<T> = null extends T ? T | '(null_value)' : T | null;
 
-type WithoutId<T> = Omit<T, 'id'>;
 type UpdateRequest<T> = { [K in keyof T]: DatabaseOptionalValue<T[K]> };
 
-export type { DbPage, PaginatedResult, WithoutId, UpdateRequest, DatabaseOptionalValue };
+export type { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue };

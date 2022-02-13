@@ -1,4 +1,5 @@
-import { Limit, Offset, Id } from 'src/core/database';
+import { BigNumber } from 'bignumber.js';
+import { Limit, Offset, Id, Uid, Username } from 'src/core/database';
 import { AppError } from 'src/core/errors';
 
 import { Validated, NotValidated } from './types';
@@ -25,16 +26,34 @@ const validateLimit = (num: unknown): Limit => {
   return numParsed;
 };
 
+const validateUid = (uid: unknown): Uid => {
+  if (!uid || typeof uid !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  if (new BigNumber(uid).isNaN())
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return uid;
+};
+
+const validateUsername = (name: unknown): Username => {
+  if (!name || typeof name !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return name;
+};
+
 const validators = {
   limit: validateLimit,
   offset: validateOffset,
   id: validateId,
+  uid: validateUid,
+  username: validateUsername,
 } as const;
 
 interface QueryRes {
   id: Id;
   offset: Offset;
   limit: Limit;
+  uid: Uid;
+  username: Username;
 }
 
 type QueryParams = NotValidated<QueryRes>;

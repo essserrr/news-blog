@@ -1,31 +1,55 @@
 import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
-import { DbPage, PaginatedResult, WithoutId, UpdateRequest, DatabaseOptionalValue } from './types';
-import { Id, Name, OptionalName, Pid, OptionalPid, Offset, Limit } from './entities';
+import { User, UserUnderscored } from 'src/core/user';
+import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
+import {
+  Id,
+  Name,
+  OptionalName,
+  Pid,
+  OptionalPid,
+  Offset,
+  Limit,
+  Uid,
+  SecondName,
+  Avatar,
+  Username,
+  Password,
+  CreatedAt,
+  IsAdmin,
+  AuthToken,
+} from './entities';
 
 interface MessageResponse {
   message: string;
 }
 
-type TagUpdate = WithoutId<Tag>;
+type TagUpdate = Omit<Tag, 'id'>;
 
-type CategoryInsert = WithoutId<Category>;
-type CategoryUpdate = UpdateRequest<WithoutId<Category>>;
+type CategoryInsert = Omit<Category, 'id'>;
+type CategoryUpdate = UpdateRequest<Omit<Category, 'id'>>;
+
+type UserSignup = Omit<User, 'uid' | 'createdAt' | 'isAdmin'>;
 
 interface Database {
   tags: {
     add: (options: TagUpdate) => Promise<Tag>;
-    update: (id: number, options: TagUpdate) => Promise<Tag>;
-    remove: (id: number) => Promise<MessageResponse>;
-    get: (id: number) => Promise<Tag>;
+    update: (id: Id, options: TagUpdate) => Promise<Tag>;
+    remove: (id: Id) => Promise<MessageResponse>;
+    get: (id: Id) => Promise<Tag>;
     getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Tag>>;
   };
   categories: {
     add: (options: CategoryInsert) => Promise<Category>;
-    update: (id: number, options: CategoryUpdate) => Promise<Category>;
-    remove: (id: number) => Promise<MessageResponse>;
-    get: (id: number) => Promise<Category>;
+    update: (id: Id, options: CategoryUpdate) => Promise<Category>;
+    remove: (id: Id) => Promise<MessageResponse>;
+    get: (id: Id) => Promise<Category>;
     getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Category>>;
+  };
+  users: {
+    signup: (options: UserSignup) => Promise<UserUnderscored>;
+    remove: (id: Uid) => Promise<MessageResponse>;
+    get: (id: Uid) => Promise<UserUnderscored>;
   };
 }
 
@@ -34,7 +58,21 @@ interface DatabaseConfig {
   ssl: boolean;
 }
 
-export type { Id, Name, OptionalName, Pid, OptionalPid };
+export type {
+  Id,
+  Name,
+  OptionalName,
+  Pid,
+  OptionalPid,
+  Uid,
+  SecondName,
+  Avatar,
+  Username,
+  Password,
+  CreatedAt,
+  IsAdmin,
+  AuthToken,
+};
 export type { Offset, Limit };
 export type { DbPage, PaginatedResult, DatabaseOptionalValue };
 export type { TagUpdate, CategoryInsert, CategoryUpdate };

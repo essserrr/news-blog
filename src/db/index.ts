@@ -10,6 +10,7 @@ import {
   updateCategory,
   removeCategory,
 } from './actions/categories';
+import { signup, getUser, removeUser } from './actions/users';
 
 import { DbInstance } from './types';
 import queries from './queries';
@@ -40,6 +41,11 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       add: addCategory(instance),
       update: updateCategory(instance),
       remove: removeCategory(instance),
+    },
+    users: {
+      signup: signup(instance),
+      get: getUser(instance),
+      remove: removeUser(instance),
     },
   };
 };

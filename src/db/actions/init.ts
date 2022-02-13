@@ -22,7 +22,9 @@ const connectDb = async (logger: Logger, config: DatabaseConfig): Promise<Pool> 
 };
 
 const initTables = async (pool: Pool, logger: Logger) => {
-  await pool.query(`${queries.tags.createTagsTable} ${queries.categories.createCategoriesTable}`);
+  await pool.query(
+    `${queries.tags.createTagsTable} ${queries.categories.createCategoriesTable} ${queries.users.createUsersTable}`,
+  );
   logger.debug('Tables initiated');
 };
 

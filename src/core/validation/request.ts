@@ -1,5 +1,14 @@
 import { AppError } from 'src/core/errors';
-import { Pid, OptionalPid, Name, OptionalName } from 'src/core/database';
+import {
+  Pid,
+  OptionalPid,
+  Name,
+  OptionalName,
+  SecondName,
+  Username,
+  Password,
+  Avatar,
+} from 'src/core/database';
 
 import { Validated, NotValidated } from './types';
 
@@ -38,11 +47,42 @@ const validateOptionalPid = (num: unknown): OptionalPid => {
   return numParsed;
 };
 
+const validateSecondName = (name: unknown): SecondName => {
+  if (!name || typeof name !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return name;
+};
+
+const validateUsername = (name: unknown): Username => {
+  if (!name || typeof name !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return name;
+};
+
+const validatePassword = (name: unknown): Password => {
+  if (!name || typeof name !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return name;
+};
+
+const validateAvatar = (name: unknown): Avatar => {
+  if (name === null) return null;
+
+  if (!name || typeof name !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return name;
+};
+
 const validators = {
   name: validateName,
   optionalName: validateOptionalName,
   pid: validatePid,
   optionalPid: validateOptionalPid,
+
+  secondName: validateSecondName,
+  username: validateUsername,
+  password: validatePassword,
+  avatar: validateAvatar,
 } as const;
 
 interface ReqRes {
@@ -50,6 +90,11 @@ interface ReqRes {
   optionalName: OptionalName;
   pid: Pid;
   optionalPid: OptionalPid;
+
+  secondName: SecondName;
+  username: Username;
+  password: Password;
+  avatar: Avatar;
 }
 
 type ReqParams = NotValidated<ReqRes>;
