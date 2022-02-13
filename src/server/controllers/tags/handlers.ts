@@ -1,5 +1,5 @@
+import { TagBody } from 'src/core/remote-client';
 import { Handler, respondWithError } from 'src/core/server';
-import { TagUpdate } from 'src/core/tags';
 import { getTypedError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 
@@ -41,7 +41,7 @@ const update: Handler = (app) => async (req, res) => {
   try {
     const { id } = validateQuery({ id: req.params.id });
 
-    const { name }: TagUpdate = req.body;
+    const { name }: TagBody = req.body;
     const { name: validatedName } = validateReq({ name });
 
     const data = await app.db.tags.update(id, { name: validatedName });

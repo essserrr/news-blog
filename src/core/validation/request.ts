@@ -1,14 +1,15 @@
 import { AppError } from 'src/core/errors';
+import { Pid, OptionalPid, Name, OptionalName } from 'src/core/database';
 
 import { Validated, NotValidated } from './types';
 
-const validateName = (name: unknown): string => {
+const validateName = (name: unknown): Name => {
   if (!name || typeof name !== 'string')
     throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
   return name;
 };
 
-const validateOptionalName = (name: unknown): string | null => {
+const validateOptionalName = (name: unknown): OptionalName => {
   if (name === undefined) return null;
 
   if (!name || typeof name !== 'string')
@@ -16,9 +17,8 @@ const validateOptionalName = (name: unknown): string | null => {
   return name;
 };
 
-const validateOptionalPid = (num: unknown): number | null | '(null_value)' => {
-  if (num === null) return '(null_value)';
-  if (num === undefined) return null;
+const validatePid = (num: unknown): Pid => {
+  if (num === null) return null;
 
   const numParsed = Number(num);
   if (Number.isNaN(numParsed) || numParsed < 0)
@@ -27,8 +27,9 @@ const validateOptionalPid = (num: unknown): number | null | '(null_value)' => {
   return numParsed;
 };
 
-const validatePid = (num: unknown): number | null => {
-  if (num === null) return null;
+const validateOptionalPid = (num: unknown): OptionalPid => {
+  if (num === null) return '(null_value)';
+  if (num === undefined) return null;
 
   const numParsed = Number(num);
   if (Number.isNaN(numParsed) || numParsed < 0)
@@ -45,10 +46,10 @@ const validators = {
 } as const;
 
 interface ReqRes {
-  name: string;
-  optionalName: string | null;
-  pid: number | null;
-  optionalPid: number | null | '(null_value)';
+  name: Name;
+  optionalName: OptionalName;
+  pid: Pid;
+  optionalPid: OptionalPid;
 }
 
 type ReqParams = NotValidated<ReqRes>;

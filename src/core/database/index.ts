@@ -1,20 +1,16 @@
-import type { MessageResponse } from 'src/core/server';
-import { Tag, TagUpdate } from './tags';
-import { Category, CategoryUpdate, CategoryInsert } from './categories';
+import { Tag } from 'src/core/tags';
+import { Category } from 'src/core/categories';
+import { DbPage, PaginatedResult, WithoutId, UpdateRequest, DatabaseOptionalValue } from './types';
+import { Id, Name, OptionalName, Pid, OptionalPid, Offset, Limit } from './entities';
 
-type Offset = number;
-type Limit = number | null;
+interface MessageResponse {
+  message: string;
+}
 
-type DbPage<T> = {
-  count: number;
-  rows: Array<T>;
-};
+type TagUpdate = WithoutId<Tag>;
 
-type PaginatedResult<T> = {
-  count: number;
-  data: Array<T>;
-  next: boolean;
-};
+type CategoryInsert = WithoutId<Category>;
+type CategoryUpdate = UpdateRequest<WithoutId<Category>>;
 
 interface Database {
   tags: {
@@ -38,4 +34,8 @@ interface DatabaseConfig {
   ssl: boolean;
 }
 
-export type { DatabaseConfig, Database, Limit, Offset, DbPage, PaginatedResult };
+export type { Id, Name, OptionalName, Pid, OptionalPid };
+export type { Offset, Limit };
+export type { DbPage, PaginatedResult, DatabaseOptionalValue };
+export type { TagUpdate, CategoryInsert, CategoryUpdate };
+export type { DatabaseConfig, Database };

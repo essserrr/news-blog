@@ -1,9 +1,9 @@
-import { Limit, Offset } from 'src/core/database';
+import { Limit, Offset, Id } from 'src/core/database';
 import { AppError } from 'src/core/errors';
 
 import { Validated, NotValidated } from './types';
 
-const validateId = (id: unknown): number => {
+const validateId = (id: unknown): Id => {
   const idParsed = Number(id);
   if (Number.isNaN(idParsed) || idParsed < 0)
     throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
@@ -32,7 +32,7 @@ const validators = {
 } as const;
 
 interface QueryRes {
-  id: number;
+  id: Id;
   offset: Offset;
   limit: Limit;
 }

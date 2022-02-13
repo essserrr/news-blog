@@ -1,5 +1,5 @@
+import { CategoryUpdateBody, CategoryInsertBody } from 'src/core/remote-client';
 import { Handler, respondWithError } from 'src/core/server';
-import { CategoryUpdateBody, CategoryInsertBody } from 'src/core/categories';
 import { getTypedError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 
