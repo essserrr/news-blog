@@ -1,7 +1,7 @@
 type AuthStatus = {
   loggedIn: boolean;
   isAdmin: boolean;
-  token?: string;
+  authToken?: string | null;
 };
 
 export type { AuthStatus };

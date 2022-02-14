@@ -1,6 +1,6 @@
 import express from 'express';
 import { App } from 'src/core/app';
-import { loginAdminMiddleware, ProtectedMethods } from 'src/server/middleware/login';
+import { authAdminMiddleware, ProtectedMethods } from 'src/server/middleware/auth';
 
 import { getAll, get, add, update, remove } from './handlers';
 
@@ -16,7 +16,7 @@ const initTagRouter = (app: App) => {
   router.route('/').get(getAll(app));
 
   router
-    .use('/:id', loginAdminMiddleware(app, protectedMethods))
+    .use('/:id', authAdminMiddleware(app, protectedMethods))
     .route('/:id')
     .get(get(app))
     .post(add(app))

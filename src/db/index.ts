@@ -11,7 +11,7 @@ import {
   removeCategory,
 } from './actions/categories';
 import { signup, getUser, removeUser } from './actions/users';
-import { login, logout } from './actions/auth';
+import { login, logout, checkPass, checkToken } from './actions/auth';
 
 import { DbInstance } from './types';
 import queries from './queries';
@@ -51,6 +51,8 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
     auth: {
       login: login(instance),
       logout: logout(instance),
+      checkPass: checkPass(instance),
+      checkToken: checkToken(instance),
     },
   };
 };

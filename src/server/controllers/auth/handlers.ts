@@ -6,10 +6,10 @@ import { validateQuery } from 'src/core/validation';
 
 const login: Handler = (app) => async (req, res) => {
   try {
-    const { uid } = validateQuery({ uid: req.params.id });
+    const { username } = validateQuery({ username: req.params.id });
     const authToken = uuidv4();
 
-    const data = await app.db.auth.login(uid, { authToken });
+    const data = await app.db.auth.login(username, { authToken });
 
     res.send({ data: mapSelfUser(data) });
   } catch (e) {

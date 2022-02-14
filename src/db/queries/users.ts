@@ -17,6 +17,11 @@ enum UserRules {
   SORT_BY_USERNAME = 'users_username_sort_asc',
 }
 
+const userResponses = {
+  checkPass: `${UsersTable.PASSWORD}, ${UsersTable.AUTH_TOKEN}, ${UsersTable.IS_ADMIN}`,
+  checkToken: `${UsersTable.AUTH_TOKEN}, ${UsersTable.IS_ADMIN}`,
+} as const;
+
 const users = {
   createUsersTable: `CREATE TABLE IF NOT EXISTS ${Tables.USERS}(
         ${UsersTable.UID} bigserial NOT NULL PRIMARY KEY,
@@ -47,11 +52,11 @@ const users = {
 
   select: `SELECT * FROM ${Tables.USERS} WHERE ${UsersTable.UID}=$1;`,
 
-  login: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN} = COALESCE($2, ${UsersTable.USERNAME}) WHERE ${UsersTable.UID}=$1 RETURNING *;`,
-  logout: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN} = NULL WHERE ${UsersTable.UID}=$1;`,
+  login: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN}=$2 WHERE ${UsersTable.USERNAME}=$1 RETURNING *;`,
+  logout: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN}=NULL WHERE ${UsersTable.UID}=$1;`,
 
-  // !!!! not null
-  auth: `SELECT * FROM ${Tables.USERS} WHERE (${UsersTable.UID}=$1 AND ${UsersTable.AUTH_TOKEN}=$2);`,
+  checkPass: `SELECT ${userResponses.checkPass} FROM ${Tables.USERS} WHERE ${UsersTable.USERNAME}=$1;`,
+  checkToken: `SELECT ${userResponses.checkToken} FROM ${Tables.USERS} WHERE ${UsersTable.UID}=$1;`,
 
   update: `
               UPDATE ${Tables.USERS}

@@ -1,6 +1,6 @@
 import express from 'express';
 import { App } from 'src/core/app';
-import { loginAdminMiddleware, ProtectedMethods } from 'src/server/middleware/login';
+import { authAdminMiddleware, ProtectedMethods } from 'src/server/middleware/auth';
 
 import { get, signup, remove } from './handlers';
 
@@ -12,7 +12,7 @@ const initUsersRouter = (app: App) => {
   const router = express.Router();
 
   router
-    .use('/:id', loginAdminMiddleware(app, protectedMethods))
+    .use('/:id', authAdminMiddleware(app, protectedMethods))
     .route('/:id')
     .get(get(app))
     .post(signup(app))

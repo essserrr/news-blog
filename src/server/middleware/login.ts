@@ -1,39 +1,45 @@
-import { RequestHandler, Request } from 'express';
+import { Request } from 'express';
+import { compare } from 'bcrypt';
 import { AuthStatus } from 'src/core/auth';
 import { respondWithError } from 'src/core/server';
-import { AppError } from 'src/core/errors';
+import { AppError, getTypedError } from 'src/core/errors';
 import { App } from 'src/core/app';
-
-type ProtectedMethods = Record<string, true>;
-type AuthMiddleware = (app: App, protectedMethods: ProtectedMethods) => RequestHandler;
+import { validateQuery, validateReq } from 'src/core/validation';
+import type { AuthMiddleware, ProtectedMethods } from './auth';
 
 const login = async (app: App, req: Request): Promise<AuthStatus> => {
-  const { token } = req.body || {};
-  app.logger.debug(`Log in attempt with token: ${token}`);
-  return token ? { loggedIn: true, isAdmin: true, token } : { loggedIn: false, isAdmin: false };
+  const { username } = validateQuery({ username: req.params.id });
+
+  const { password } = req.body || {};
+  const { password: passwordValidated } = validateReq({ password });
+  app.logger.debug(`Log in attempt from: ${username}`);
+
+  const {
+    is_admin: isAdmin,
+    auth_token: authToken,
+    password: targetPassword,
+  } = await app.db.auth.checkPass(username);
+
+  const passwordsMatch = await compare(passwordValidated, targetPassword);
+  return passwordsMatch ? { loggedIn: true, isAdmin, authToken } : { loggedIn: false, isAdmin };
 };
 
-const loginAdminMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, res, next) => {
+const loginMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, res, next) => {
   try {
     if (!protectedMethods[req.method]) {
       next();
       return;
     }
 
-    const auth = await login(app, req);
-    if (!auth.isAdmin || !auth.loggedIn)
-      throw new AppError({ code: 'FORBIDDEN', errorType: 'Admin auth error' });
+    const authObject = await login(app, req);
+    if (!authObject.loggedIn) throw new AppError({ code: 'NOT_FOUND', errorType: 'Auth error' });
 
-    res.locals.auth = auth;
+    res.locals.auth = authObject;
     next();
   } catch (e) {
-    respondWithError(
-      app,
-      res,
-      new AppError({ code: 'FORBIDDEN', errorType: 'Admin auth error', originalError: e }),
-    );
+    respondWithError(app, res, getTypedError(e));
   }
 };
 
 export type { AuthMiddleware, ProtectedMethods };
-export { loginAdminMiddleware };
+export { loginMiddleware };

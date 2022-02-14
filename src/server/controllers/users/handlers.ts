@@ -1,8 +1,8 @@
-import { hashSync } from 'bcrypt';
+import { hash } from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { UserSignupBody } from 'src/core/remote-client';
 import { Handler, respondWithError } from 'src/core/server';
-import { mapUser, mapSelfUser } from 'src/core/user';
+import { mapForeignUser, mapSelfUser } from 'src/core/user';
 import { getTypedError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 import { SALT_ROUNDS } from 'src/config';
@@ -12,7 +12,7 @@ const get: Handler = (app) => async (req, res) => {
     const { uid } = validateQuery({ uid: req.params.id });
     const data = await app.db.users.get(uid);
 
-    res.send({ data: mapUser(data) });
+    res.send({ data: mapForeignUser(data) });
   } catch (e) {
     respondWithError(app, res, getTypedError(e));
   }
@@ -22,7 +22,7 @@ const signup: Handler = (app) => async (req, res) => {
   try {
     const { username } = validateReq({ username: req.params.id });
 
-    const { name, secondName, password, avatar }: UserSignupBody = req.body;
+    const { name, secondName, password, avatar }: UserSignupBody = req.body || {};
     const {
       name: validatedName,
       secondName: validatedSecondName,
@@ -35,7 +35,7 @@ const signup: Handler = (app) => async (req, res) => {
       avatar,
     });
 
-    const hashedPassword = hashSync(validatedPassword, SALT_ROUNDS);
+    const hashedPassword = await hash(validatedPassword, SALT_ROUNDS);
 
     const authToken = uuidv4();
 

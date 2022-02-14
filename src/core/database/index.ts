@@ -1,6 +1,6 @@
 import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
-import { User, UserUnderscored } from 'src/core/user';
+import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import {
   Id,
@@ -52,12 +52,14 @@ interface Database {
   };
   users: {
     signup: (options: UserSignup) => Promise<UserUnderscored>;
-    remove: (id: Uid) => Promise<MessageResponse>;
-    get: (id: Uid) => Promise<UserUnderscored>;
+    remove: (uid: Uid) => Promise<MessageResponse>;
+    get: (uid: Uid) => Promise<UserUnderscored>;
   };
   auth: {
-    login: (id: Uid, options: UserLogin) => Promise<UserUnderscored>;
-    logout: (id: Uid) => Promise<MessageResponse>;
+    login: (uid: Username, options: UserLogin) => Promise<UserUnderscored>;
+    logout: (uid: Uid) => Promise<MessageResponse>;
+    checkPass: (username: Username) => Promise<UserPasswordReq>;
+    checkToken: (uid: Uid) => Promise<UserAuthReq>;
   };
 }
 

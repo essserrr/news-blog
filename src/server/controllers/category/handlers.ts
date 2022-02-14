@@ -30,7 +30,7 @@ const add: Handler = (app) => async (req, res) => {
   try {
     const { name } = validateReq({ name: req.params.id });
 
-    const { pid }: CategoryInsertBody = req.body;
+    const { pid }: CategoryInsertBody = req.body || {};
     const { name: validatedName, pid: validatedPid } = validateReq({
       name,
       pid,
@@ -48,7 +48,7 @@ const update: Handler = (app) => async (req, res) => {
   try {
     const { id } = validateQuery({ id: req.params.id });
 
-    const { name, pid }: CategoryUpdateBody = req.body;
+    const { name, pid }: CategoryUpdateBody = req.body || {};
     const { optionalName: validatedName, optionalPid: validatedPid } = validateReq({
       optionalName: name,
       optionalPid: pid,

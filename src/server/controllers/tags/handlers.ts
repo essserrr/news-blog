@@ -41,7 +41,7 @@ const update: Handler = (app) => async (req, res) => {
   try {
     const { id } = validateQuery({ id: req.params.id });
 
-    const { name }: TagBody = req.body;
+    const { name }: TagBody = req.body || {};
     const { name: validatedName } = validateReq({ name });
 
     const data = await app.db.tags.update(id, { name: validatedName });
