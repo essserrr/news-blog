@@ -20,6 +20,9 @@ import {
   AuthToken,
 } from './entities';
 
+type Require<T> = {
+  [P in keyof T]: NonNullable<T[P]>;
+};
 interface MessageResponse {
   message: string;
 }
@@ -30,6 +33,7 @@ type CategoryInsert = Omit<Category, 'id'>;
 type CategoryUpdate = UpdateRequest<Omit<Category, 'id'>>;
 
 type UserSignup = Omit<User, 'uid' | 'createdAt' | 'isAdmin'>;
+type UserLogin = Require<Pick<User, 'authToken'>>;
 
 interface Database {
   tags: {
@@ -50,6 +54,10 @@ interface Database {
     signup: (options: UserSignup) => Promise<UserUnderscored>;
     remove: (id: Uid) => Promise<MessageResponse>;
     get: (id: Uid) => Promise<UserUnderscored>;
+  };
+  auth: {
+    login: (id: Uid, options: UserLogin) => Promise<UserUnderscored>;
+    logout: (id: Uid) => Promise<MessageResponse>;
   };
 }
 

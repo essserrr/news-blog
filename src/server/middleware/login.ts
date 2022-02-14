@@ -4,8 +4,8 @@ import { respondWithError } from 'src/core/server';
 import { AppError } from 'src/core/errors';
 import { App } from 'src/core/app';
 
-type AuthMiddleware = (app: App, allowed: NoAuthMethods) => RequestHandler;
-type NoAuthMethods = Record<string, true>;
+type ProtectedMethods = Record<string, true>;
+type AuthMiddleware = (app: App, protectedMethods: ProtectedMethods) => RequestHandler;
 
 const login = async (app: App, req: Request): Promise<AuthStatus> => {
   const { token } = req.body || {};
@@ -13,9 +13,9 @@ const login = async (app: App, req: Request): Promise<AuthStatus> => {
   return token ? { loggedIn: true, isAdmin: true, token } : { loggedIn: false, isAdmin: false };
 };
 
-const loginAdminMiddleware: AuthMiddleware = (app, allowed) => async (req, res, next) => {
+const loginAdminMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, res, next) => {
   try {
-    if (allowed[req.method]) {
+    if (!protectedMethods[req.method]) {
       next();
       return;
     }
@@ -35,5 +35,5 @@ const loginAdminMiddleware: AuthMiddleware = (app, allowed) => async (req, res, 
   }
 };
 
-export type { AuthMiddleware, NoAuthMethods };
+export type { AuthMiddleware, ProtectedMethods };
 export { loginAdminMiddleware };

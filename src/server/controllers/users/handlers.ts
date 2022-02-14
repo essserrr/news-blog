@@ -1,7 +1,8 @@
 import { hashSync } from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { UserSignupBody } from 'src/core/remote-client';
-import { Handler, respondWithError, mapUser, mapSelfUser } from 'src/core/server';
+import { Handler, respondWithError } from 'src/core/server';
+import { mapUser, mapSelfUser } from 'src/core/user';
 import { getTypedError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 import { SALT_ROUNDS } from 'src/config';

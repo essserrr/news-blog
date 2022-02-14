@@ -1,11 +1,13 @@
 import express from 'express';
 import { App } from 'src/core/app';
-import { loginAdminMiddleware, NoAuthMethods } from 'src/server/middleware/login';
+import { loginAdminMiddleware, ProtectedMethods } from 'src/server/middleware/login';
 
 import { getAll, get, add, update, remove } from './handlers';
 
-const allowedMethods: NoAuthMethods = {
-  GET: true,
+const protectedMethods: ProtectedMethods = {
+  POST: true,
+  PATCH: true,
+  DELETE: true,
 };
 
 const initCategoryRouter = (app: App) => {
@@ -14,7 +16,7 @@ const initCategoryRouter = (app: App) => {
   router.route('/').get(getAll(app));
 
   router
-    .use('/:id', loginAdminMiddleware(app, allowedMethods))
+    .use('/:id', loginAdminMiddleware(app, protectedMethods))
     .route('/:id')
     .get(get(app))
     .post(add(app))

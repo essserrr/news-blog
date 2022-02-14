@@ -43,20 +43,15 @@ const users = {
                 ${UsersTable.AUTH_TOKEN}
           ) VALUES ($1, $2, $3, $4, $5, $6) 
           RETURNING *;`,
-
   delete: `DELETE FROM ${Tables.USERS} WHERE ${UsersTable.UID}=$1;`,
 
   select: `SELECT * FROM ${Tables.USERS} WHERE ${UsersTable.UID}=$1;`,
 
+  login: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN} = COALESCE($2, ${UsersTable.USERNAME}) WHERE ${UsersTable.UID}=$1 RETURNING *;`,
+  logout: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN} = NULL WHERE ${UsersTable.UID}=$1;`,
+
   // !!!! not null
   auth: `SELECT * FROM ${Tables.USERS} WHERE (${UsersTable.UID}=$1 AND ${UsersTable.AUTH_TOKEN}=$2);`,
-  login: `UPDATE ${Tables.USERS}
-              SET ${UsersTable.AUTH_TOKEN} = COALESCE($5, ${UsersTable.USERNAME}),
-              WHERE (${UsersTable.UID}=$1 AND ${UsersTable.PASSWORD}=$2) RETURNING *;`,
-  // !!!! not null
-  logout: `UPDATE ${Tables.USERS}
-              SET ${UsersTable.AUTH_TOKEN} = NULL,
-              WHERE (${UsersTable.UID}=$1 AND ${UsersTable.AUTH_TOKEN}=$2) RETURNING *;`,
 
   update: `
               UPDATE ${Tables.USERS}
