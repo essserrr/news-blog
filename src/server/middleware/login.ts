@@ -21,7 +21,9 @@ const login = async (app: App, req: Request): Promise<AuthStatus> => {
   } = await app.db.auth.checkPass(username);
 
   const passwordsMatch = await compare(passwordValidated, targetPassword);
-  return passwordsMatch ? { loggedIn: true, isAdmin, authToken } : { loggedIn: false, isAdmin };
+  return passwordsMatch
+    ? { loggedIn: true, isAdmin, authToken }
+    : { loggedIn: false, isAdmin: false };
 };
 
 const loginMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, res, next) => {

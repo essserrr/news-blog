@@ -8,6 +8,7 @@ import {
   Username,
   Password,
   Avatar,
+  AuthToken,
 } from 'src/core/database';
 
 import { Validated, NotValidated } from './types';
@@ -73,6 +74,12 @@ const validateAvatar = (name: unknown): Avatar => {
   return name;
 };
 
+const validateAuthToken = (name: unknown): AuthToken => {
+  if (!name || typeof name !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return name;
+};
+
 const validators = {
   name: validateName,
   optionalName: validateOptionalName,
@@ -83,6 +90,7 @@ const validators = {
   username: validateUsername,
   password: validatePassword,
   avatar: validateAvatar,
+  authToken: validateAuthToken,
 } as const;
 
 interface ReqRes {
@@ -95,6 +103,7 @@ interface ReqRes {
   username: Username;
   password: Password;
   avatar: Avatar;
+  authToken: AuthToken;
 }
 
 type ReqParams = NotValidated<ReqRes>;

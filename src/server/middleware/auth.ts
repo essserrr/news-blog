@@ -2,17 +2,23 @@ import { RequestHandler, Request } from 'express';
 import { AuthStatus } from 'src/core/auth';
 import { respondWithError } from 'src/core/server';
 import { AppError, getTypedError } from 'src/core/errors';
+import { validateQuery, validateReq } from 'src/core/validation';
 import { App } from 'src/core/app';
 
 type ProtectedMethods = Record<string, true>;
 type AuthMiddleware = (app: App, protectedMethods: ProtectedMethods) => RequestHandler;
 
 const authenticate = async (app: App, req: Request): Promise<AuthStatus> => {
-  const { token: authToken } = req.body || {};
-  app.logger.debug(`Log in attempt with token: ${authToken}`);
-  return authToken
-    ? { loggedIn: true, isAdmin: true, authToken }
-    : { loggedIn: false, isAdmin: false };
+  const { uid } = validateQuery({ uid: req.params.id });
+
+  const { authToken } = req.body || {};
+  const { authToken: authTokenValidated } = validateReq({ authToken });
+  app.logger.debug(`Log in attempt from: ${uid}`);
+
+  const { is_admin: isAdmin, auth_token: targetAuthToken } = await app.db.auth.checkToken(uid);
+
+  const tokensMatch = authTokenValidated === targetAuthToken;
+  return tokensMatch ? { loggedIn: true, isAdmin, authToken } : { loggedIn: false, isAdmin: false };
 };
 
 const authAdminMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, res, next) => {
@@ -23,7 +29,7 @@ const authAdminMiddleware: AuthMiddleware = (app, protectedMethods) => async (re
     }
 
     const authObject = await authenticate(app, req);
-    if (!authObject.isAdmin || !authObject.loggedIn)
+    if (/* !!!!!! !authObject.isAdmin || */ !authObject.loggedIn)
       throw new AppError({ code: 'FORBIDDEN', errorType: 'Admin auth error' });
 
     res.locals.auth = authObject;

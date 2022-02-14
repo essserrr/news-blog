@@ -35,9 +35,6 @@ const mapForeignUser = ({
   username,
   created_at,
   is_admin,
-  // !!!
-  auth_token,
-  password,
 }: UserUnderscored): MappedForeignUser => ({
   uid,
   name,
@@ -46,8 +43,6 @@ const mapForeignUser = ({
   username,
   createdAt: created_at,
   isAdmin: is_admin,
-  auth_token,
-  password,
 });
 
 type MappedSelf = Omit<User, 'password'>;
