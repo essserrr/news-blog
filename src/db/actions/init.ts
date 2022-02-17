@@ -1,4 +1,5 @@
 import { Pool, PoolConfig } from 'pg';
+import { AppError } from 'src/core/errors';
 import { Logger } from 'src/core/logger';
 import { DatabaseConfig } from 'src/core/database';
 import queries from 'src/db/queries';
@@ -6,7 +7,8 @@ import queries from 'src/db/queries';
 type Config = Pick<PoolConfig, 'connectionString' | 'ssl'>;
 
 const parseConfig = ({ databaseUrl, ssl }: DatabaseConfig): Config => {
-  if (!databaseUrl) throw new Error('Database config: No database url');
+  if (!databaseUrl)
+    throw new AppError({ message: 'Database config: No database url', code: 'WRONG_FORMAT' });
   return {
     connectionString: databaseUrl,
     ssl,

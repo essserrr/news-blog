@@ -1,5 +1,9 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
+
 import { App } from 'src/core/app';
+import { AppError } from 'src/core/errors';
+
 import initTagRouter from './controllers/tags';
 import initCategoryRouter from './controllers/category';
 import initUsers from './controllers/users';
@@ -9,12 +13,26 @@ import { notFound } from './controllers/not-found';
 
 interface InitServerProps {
   app: App;
+  secretKey: string | undefined;
 }
 
-const initServer = ({ app }: InitServerProps) => {
+//{ path: '/', httpOnly: true, secure: false, maxAge: null }
+
+/*
+
+     httpOnly: true,
+      secure: true,
+      sameSite: true,
+*/
+
+const initServer = ({ app, secretKey }: InitServerProps) => {
+  if (!secretKey)
+    throw new AppError({ message: 'Server config: No secret key', code: 'WRONG_FORMAT' });
+
   const server = express();
 
   server.use(express.json());
+  server.use(cookieParser(secretKey));
 
   server.use('/tags', initTagRouter(app));
   server.use('/categories', initCategoryRouter(app));

@@ -1,9 +1,10 @@
 const {
   DATABASE_URL,
   NODE_ENV,
-  LOG_LEVEL = 'info',
   PORT: ENV_PORT,
   DATABASE_SSL: ENV_DATABASE_SSL,
+  SECRET_COOKIES_KEY,
+  LOG_LEVEL = 'info',
 } = process.env;
 
 const IS_PRODUCTION = NODE_ENV === 'production';
@@ -12,4 +13,12 @@ const PORT = Number(ENV_PORT) || 8000;
 
 const SALT_ROUNDS = 10;
 
-export { LOG_LEVEL, PORT, DATABASE_URL, IS_PRODUCTION, DATABASE_SSL, SALT_ROUNDS };
+export {
+  LOG_LEVEL,
+  PORT,
+  DATABASE_URL,
+  IS_PRODUCTION,
+  DATABASE_SSL,
+  SALT_ROUNDS,
+  SECRET_COOKIES_KEY,
+};

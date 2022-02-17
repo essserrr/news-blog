@@ -25,9 +25,6 @@ const authenticate = async (app: App, req: Request): Promise<AuthStatus> => {
 };
 
 const authAdminMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, res, next) => {
-  console.log(`
-  auth M
-  `);
   try {
     if (!protectedMethods[req.method]) {
       next();
