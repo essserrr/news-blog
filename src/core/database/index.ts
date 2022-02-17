@@ -1,6 +1,7 @@
 import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
 import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
+import { Author } from 'src/core/author';
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import {
   Id,
@@ -18,6 +19,7 @@ import {
   CreatedAt,
   IsAdmin,
   AuthToken,
+  Description,
 } from './entities';
 
 type Require<T> = {
@@ -34,6 +36,9 @@ type CategoryUpdate = UpdateRequest<Omit<Category, 'id'>>;
 
 type UserSignup = Omit<User, 'uid' | 'createdAt' | 'isAdmin'>;
 type UserLogin = Require<Pick<User, 'authToken'>>;
+
+type AuthorInsert = Omit<Author, 'uid'>;
+type AuthorUpdate = UpdateRequest<Omit<Author, 'uid'>>;
 
 interface Database {
   tags: {
@@ -61,6 +66,13 @@ interface Database {
     checkPass: (username: Username) => Promise<UserPasswordReq>;
     checkToken: (uid: Uid) => Promise<UserAuthReq>;
   };
+  author: {
+    add: (options: AuthorInsert) => Promise<Author>;
+    update: (uid: Uid, options: AuthorUpdate) => Promise<Author>;
+    remove: (uid: Uid) => Promise<MessageResponse>;
+    get: (uid: Uid) => Promise<Author>;
+    getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Author>>;
+  };
 }
 
 interface DatabaseConfig {
@@ -82,6 +94,7 @@ export type {
   CreatedAt,
   IsAdmin,
   AuthToken,
+  Description,
 };
 export type { Offset, Limit };
 export type { DbPage, PaginatedResult, DatabaseOptionalValue };

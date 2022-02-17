@@ -16,6 +16,8 @@ type CreatedAt = string;
 type IsAdmin = boolean;
 type AuthToken = string | null;
 
+type Description = string | null;
+
 // params
 type Offset = number;
 type Limit = number | null;
@@ -36,4 +38,5 @@ export type {
   CreatedAt,
   IsAdmin,
   AuthToken,
+  Description,
 };
