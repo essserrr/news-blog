@@ -5,6 +5,7 @@ import { UserRules } from 'src/db/queries/users';
 type DatabaseErrorCodes = 'NAME_CONFLICT' | 'WRONG_REFERENCE';
 type KnownConstraints =
   | 'categories_pid_fkey'
+  | 'authors_pkey'
   | CategoryRules.PROPER_PID
   | CategoryRules.UNIQUE_NAME
   | TagRules.UNIQUE_NAME
@@ -33,6 +34,7 @@ const databaseDictionary: Record<string, DatabaseErrorCodes> = {
 
 const constraintsDictionary: Record<string, KnownConstraints> = {
   categories_pid_fkey: 'categories_pid_fkey',
+  authors_pkey: 'authors_pkey',
   [CategoryRules.PROPER_PID]: CategoryRules.PROPER_PID,
   [CategoryRules.UNIQUE_NAME]: CategoryRules.UNIQUE_NAME,
   [TagRules.UNIQUE_NAME]: TagRules.UNIQUE_NAME,

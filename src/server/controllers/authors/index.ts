@@ -4,10 +4,6 @@ import { authAdminMiddleware, ProtectedMethods } from 'src/server/middleware/aut
 
 import { getAll, get, add, update, remove } from './handlers';
 
-const protectedMethodsAll: ProtectedMethods = {
-  GET: true,
-};
-
 const protectedMethods: ProtectedMethods = {
   GET: true,
   POST: true,
@@ -18,15 +14,9 @@ const protectedMethods: ProtectedMethods = {
 const initAuthorRouter = (app: App) => {
   const router = express.Router();
 
-  router.use('/', authAdminMiddleware(app, protectedMethodsAll)).route('/').get(getAll(app));
+  router.use('/', authAdminMiddleware(app, protectedMethods)).route('/').get(getAll(app));
 
-  router
-    .use('/:id', authAdminMiddleware(app, protectedMethods))
-    .route('/:id')
-    .get(get(app))
-    .post(add(app))
-    .patch(update(app))
-    .delete(remove(app));
+  router.route('/:id').get(get(app)).post(add(app)).patch(update(app)).delete(remove(app));
 
   return router;
 };

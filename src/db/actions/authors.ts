@@ -26,7 +26,7 @@ const getAllAuthors =
 
     const { count = 0, rows } = res.rows[0] || {};
 
-    return { count, data: rows || [], next: (limit || 0) + offset < count };
+    return { count, data: rows || [], next: limit === null ? false : limit + offset < count };
   };
 
 const addAuthor =
