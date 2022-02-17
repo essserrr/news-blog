@@ -1,16 +1,18 @@
 import { RequestHandler, Request } from 'express';
+
 import { AuthStatus } from 'src/core/auth';
 import { respondWithError } from 'src/core/server';
 import { AppError, getTypedError } from 'src/core/errors';
 import { validateQuery, validateReq } from 'src/core/validation';
+import { AuthCookies } from 'src/core/cookies-session';
+
 import { App } from 'src/core/app';
 
 type ProtectedMethods = Record<string, true>;
 type AuthMiddleware = (app: App, protectedMethods: ProtectedMethods) => RequestHandler;
 
-// !!!!! cookies based auth
 const authenticate = async (app: App, req: Request): Promise<AuthStatus> => {
-  const { auth_token: authToken, uid } = req.signedCookies || {};
+  const { [AuthCookies.AUTH_TOKEN]: authToken, [AuthCookies.UID]: uid } = req.signedCookies || {};
 
   const { uid: uidValidated } = validateQuery({ uid });
   const { authToken: authTokenValidated } = validateReq({ authToken });
