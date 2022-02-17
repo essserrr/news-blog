@@ -16,15 +16,6 @@ interface InitServerProps {
   secretKey: string | undefined;
 }
 
-//{ path: '/', httpOnly: true, secure: false, maxAge: null }
-
-/*
-
-     httpOnly: true,
-      secure: true,
-      sameSite: true,
-*/
-
 const initServer = ({ app, secretKey }: InitServerProps) => {
   if (!secretKey)
     throw new AppError({ message: 'Server config: No secret key', code: 'WRONG_FORMAT' });

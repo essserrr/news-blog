@@ -11,6 +11,23 @@ const login: Handler = (app) => async (req, res) => {
 
     const data = await app.db.auth.login(username, { authToken });
 
+    res.cookie('uid', data.uid, {
+      path: '/',
+      signed: true,
+      sameSite: true,
+      httpOnly: true,
+      secure: false,
+      maxAge: 2147483647,
+    });
+    res.cookie('auth_token', data.auth_token, {
+      path: '/',
+      signed: true,
+      sameSite: true,
+      httpOnly: true,
+      secure: false,
+      maxAge: 2147483647,
+    });
+
     res.send({ data: mapSelfUser(data) });
   } catch (e) {
     respondWithError(app, res, getTypedError(e));
@@ -22,6 +39,8 @@ const logout: Handler = (app) => async (req, res) => {
     const { uid } = validateQuery({ uid: req.params.id });
     const data = await app.db.auth.logout(uid);
 
+    res.clearCookie('uid');
+    res.clearCookie('auth_token');
     res.send(data);
   } catch (e) {
     respondWithError(app, res, getTypedError(e));

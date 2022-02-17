@@ -10,7 +10,7 @@ type AuthMiddleware = (app: App, protectedMethods: ProtectedMethods) => RequestH
 
 // !!!!! cookies based auth
 const authenticate = async (app: App, req: Request): Promise<AuthStatus> => {
-  const { authToken = '63a5369c-007d-4b1b-ba2a-214ee1cf49b7', uid = '3' } = req.body || {};
+  const { auth_token: authToken, uid } = req.signedCookies || {};
 
   const { uid: uidValidated } = validateQuery({ uid });
   const { authToken: authTokenValidated } = validateReq({ authToken });

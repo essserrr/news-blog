@@ -23,9 +23,9 @@ interface UserUnderscored {
 }
 
 type UserPasswordReq = Pick<UserUnderscored, 'password' | 'auth_token' | 'is_admin'>;
-type UserAuthReq = Pick<UserUnderscored, 'auth_token' | 'is_admin'>;
+type UserAuthReq = Pick<UserUnderscored, 'auth_token' | 'is_admin' | 'uid'>;
 
-type MappedForeignUser = Omit<User, 'password' | 'authToken'>;
+type MappedForeignUser = Omit<User, 'password' | 'authToken' | 'createdAt'>;
 
 const mapForeignUser = ({
   uid,
@@ -33,7 +33,6 @@ const mapForeignUser = ({
   second_name,
   avatar,
   username,
-  created_at,
   is_admin,
 }: UserUnderscored): MappedForeignUser => ({
   uid,
@@ -41,11 +40,10 @@ const mapForeignUser = ({
   secondName: second_name,
   avatar,
   username,
-  createdAt: created_at,
   isAdmin: is_admin,
 });
 
-type MappedSelf = Omit<User, 'password'>;
+type MappedSelf = Omit<User, 'password' | 'authToken'>;
 
 const mapSelfUser = ({
   uid,
@@ -55,7 +53,6 @@ const mapSelfUser = ({
   username,
   created_at,
   is_admin,
-  auth_token,
 }: UserUnderscored): MappedSelf => ({
   uid,
   name,
@@ -64,7 +61,6 @@ const mapSelfUser = ({
   username,
   createdAt: created_at,
   isAdmin: is_admin,
-  authToken: auth_token,
 });
 
 export type { User, UserUnderscored, UserPasswordReq, UserAuthReq };
