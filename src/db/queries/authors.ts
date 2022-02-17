@@ -21,7 +21,7 @@ const authors = {
     CREATE INDEX IF NOT EXISTS ${AuthorRules.SORT_BY_UID} ON ${CURRENT_TABLE} USING btree (${AuthorsTable.UID} ASC);
 `,
 
-  add: `INSERT INTO ${CURRENT_TABLE}(${AuthorsTable.UID}, ${AuthorsTable.DESCRIPTION}) VALUES ($1, $2) RETURNING *;`,
+  insert: `INSERT INTO ${CURRENT_TABLE}(${AuthorsTable.UID}, ${AuthorsTable.DESCRIPTION}) VALUES ($1, $2) RETURNING *;`,
 
   delete: `DELETE FROM ${CURRENT_TABLE} WHERE ${AuthorsTable.UID}=$1;`,
 
@@ -30,8 +30,8 @@ const authors = {
   update: `
               UPDATE ${CURRENT_TABLE}
                 SET ${AuthorsTable.DESCRIPTION} = CASE 
-                                            WHEN $3='(null_value)' THEN NULL
-                                            ELSE COALESCE($4, ${AuthorsTable.DESCRIPTION})
+                                            WHEN $2='(null_value)' THEN NULL
+                                            ELSE COALESCE($2, ${AuthorsTable.DESCRIPTION})
                                           END
                 WHERE ${AuthorsTable.UID}=$1 
                 RETURNING *;`,

@@ -1,7 +1,7 @@
 import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
 import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
-import { Author } from 'src/core/author';
+import { Author } from 'src/core/authors';
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import {
   Id,
@@ -37,7 +37,7 @@ type CategoryUpdate = UpdateRequest<Omit<Category, 'id'>>;
 type UserSignup = Omit<User, 'uid' | 'createdAt' | 'isAdmin'>;
 type UserLogin = Require<Pick<User, 'authToken'>>;
 
-type AuthorInsert = Omit<Author, 'uid'>;
+type AuthorInsert = Author;
 type AuthorUpdate = UpdateRequest<Omit<Author, 'uid'>>;
 
 interface Database {
@@ -66,7 +66,7 @@ interface Database {
     checkPass: (username: Username) => Promise<UserPasswordReq>;
     checkToken: (uid: Uid) => Promise<UserAuthReq>;
   };
-  author: {
+  authors: {
     add: (options: AuthorInsert) => Promise<Author>;
     update: (uid: Uid, options: AuthorUpdate) => Promise<Author>;
     remove: (uid: Uid) => Promise<MessageResponse>;

@@ -12,6 +12,7 @@ import {
 } from './actions/categories';
 import { signup, getUser, removeUser } from './actions/users';
 import { login, logout, checkPass, checkToken } from './actions/auth';
+import { addAuthor, updateAuthor, getAuthor, removeAuthor, getAllAuthors } from './actions/authors';
 
 import { DbInstance } from './types';
 import queries from './queries';
@@ -53,6 +54,13 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       logout: logout(instance),
       checkPass: checkPass(instance),
       checkToken: checkToken(instance),
+    },
+    authors: {
+      getAll: getAllAuthors(instance),
+      get: getAuthor(instance),
+      add: addAuthor(instance),
+      update: updateAuthor(instance),
+      remove: removeAuthor(instance),
     },
   };
 };
