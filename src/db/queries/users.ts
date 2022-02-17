@@ -22,8 +22,10 @@ const userResponses = {
   checkToken: `${UsersTable.AUTH_TOKEN}, ${UsersTable.IS_ADMIN}`,
 } as const;
 
+const CURRENT_TABLE = Tables.USERS;
+
 const users = {
-  createUsersTable: `CREATE TABLE IF NOT EXISTS ${Tables.USERS}(
+  createUsersTable: `CREATE TABLE IF NOT EXISTS ${CURRENT_TABLE}(
         ${UsersTable.UID} bigserial NOT NULL PRIMARY KEY,
         ${UsersTable.NAME} text NOT NULL,
         ${UsersTable.SECOND_NAME} text NOT NULL,
@@ -35,11 +37,11 @@ const users = {
         ${UsersTable.AUTH_TOKEN} text
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS ${UserRules.UNIQUE_USERNAME} ON ${Tables.USERS} (${UsersTable.USERNAME});
-    CREATE INDEX IF NOT EXISTS ${UserRules.SORT_BY_USERNAME} ON ${Tables.USERS} USING btree (${UsersTable.USERNAME} ASC);
+    CREATE UNIQUE INDEX IF NOT EXISTS ${UserRules.UNIQUE_USERNAME} ON ${CURRENT_TABLE} (${UsersTable.USERNAME});
+    CREATE INDEX IF NOT EXISTS ${UserRules.SORT_BY_USERNAME} ON ${CURRENT_TABLE} USING btree (${UsersTable.USERNAME} ASC);
 `,
 
-  signup: `INSERT INTO ${Tables.USERS}(
+  signup: `INSERT INTO ${CURRENT_TABLE}(
                 ${UsersTable.NAME}, 
                 ${UsersTable.SECOND_NAME}, 
                 ${UsersTable.AVATAR}, 
@@ -48,23 +50,23 @@ const users = {
                 ${UsersTable.AUTH_TOKEN}
           ) VALUES ($1, $2, $3, $4, $5, $6) 
           RETURNING *;`,
-  delete: `DELETE FROM ${Tables.USERS} WHERE ${UsersTable.UID}=$1;`,
+  delete: `DELETE FROM ${CURRENT_TABLE} WHERE ${UsersTable.UID}=$1;`,
 
-  select: `SELECT * FROM ${Tables.USERS} WHERE ${UsersTable.UID}=$1;`,
+  select: `SELECT * FROM ${CURRENT_TABLE} WHERE ${UsersTable.UID}=$1;`,
 
-  login: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN}=$2 WHERE ${UsersTable.USERNAME}=$1 RETURNING *;`,
-  logout: `UPDATE ${Tables.USERS} SET ${UsersTable.AUTH_TOKEN}=NULL WHERE ${UsersTable.UID}=$1;`,
+  login: `UPDATE ${CURRENT_TABLE} SET ${UsersTable.AUTH_TOKEN}=$2 WHERE ${UsersTable.USERNAME}=$1 RETURNING *;`,
+  logout: `UPDATE ${CURRENT_TABLE} SET ${UsersTable.AUTH_TOKEN}=NULL WHERE ${UsersTable.UID}=$1;`,
 
-  checkPass: `SELECT ${userResponses.checkPass} FROM ${Tables.USERS} WHERE ${UsersTable.USERNAME}=$1;`,
-  checkToken: `SELECT ${userResponses.checkToken} FROM ${Tables.USERS} WHERE ${UsersTable.UID}=$1;`,
+  checkPass: `SELECT ${userResponses.checkPass} FROM ${CURRENT_TABLE} WHERE ${UsersTable.USERNAME}=$1;`,
+  checkToken: `SELECT ${userResponses.checkToken} FROM ${CURRENT_TABLE} WHERE ${UsersTable.UID}=$1;`,
 
   update: `
-              UPDATE ${Tables.USERS}
+              UPDATE ${CURRENT_TABLE}
                 SET 
                     ${UsersTable.NAME} = COALESCE($2, ${UsersTable.NAME}),
                     ${UsersTable.SECOND_NAME} = COALESCE($3, ${UsersTable.SECOND_NAME}),
                     ${UsersTable.AVATAR} = CASE 
-                                            WHEN $3='(null_value)' THEN NULL
+                                            WHEN $4='(null_value)' THEN NULL
                                             ELSE COALESCE($4, ${UsersTable.AVATAR})
                                           END,
                     ${UsersTable.USERNAME} = COALESCE($5, ${UsersTable.USERNAME}),
@@ -74,7 +76,7 @@ const users = {
 
   selectAll: `
                     SELECT
-                      (SELECT COUNT(*) FROM ${Tables.USERS}) as count, 
+                      (SELECT COUNT(*) FROM ${CURRENT_TABLE}) as count, 
                       (SELECT json_agg(t.*) 
                         FROM (
                           SELECT 
@@ -84,7 +86,7 @@ const users = {
                                   ${UsersTable.AVATAR},
                                   ${UsersTable.USERNAME},
                                   ${UsersTable.IS_ADMIN}
-                          FROM ${Tables.USERS}
+                          FROM ${CURRENT_TABLE}
                           ORDER BY ${UsersTable.USERNAME} ASC 
                           LIMIT $1 
                           OFFSET $2

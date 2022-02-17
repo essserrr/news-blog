@@ -12,22 +12,24 @@ enum CategoryRules {
   SORT_BY_ID = 'categories_id_sort_asc',
 }
 
+const CURRENT_TABLE = Tables.CATEGORIES;
+
 const categories = {
-  createCategoriesTable: `CREATE TABLE IF NOT EXISTS ${Tables.CATEGORIES}(
+  createCategoriesTable: `CREATE TABLE IF NOT EXISTS ${CURRENT_TABLE}(
         ${CategoriesTable.ID} serial NOT NULL PRIMARY KEY,
-        ${CategoriesTable.PID} integer REFERENCES ${Tables.CATEGORIES} (${CategoriesTable.ID}) ON DELETE CASCADE,
+        ${CategoriesTable.PID} integer REFERENCES ${CURRENT_TABLE} (${CategoriesTable.ID}) ON DELETE CASCADE,
         ${CategoriesTable.NAME} text NOT NULL, 
         CONSTRAINT ${CategoryRules.PROPER_PID} CHECK (${CategoriesTable.PID} <> ${CategoriesTable.ID} AND ${CategoriesTable.PID} > 0)
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS ${CategoryRules.UNIQUE_NAME} ON ${Tables.CATEGORIES} (lower(${CategoriesTable.NAME}));
-    CREATE INDEX IF NOT EXISTS ${CategoryRules.SORT_BY_ID} ON ${Tables.CATEGORIES} USING btree (${CategoriesTable.ID} ASC);
+    CREATE UNIQUE INDEX IF NOT EXISTS ${CategoryRules.UNIQUE_NAME} ON ${CURRENT_TABLE} (lower(${CategoriesTable.NAME}));
+    CREATE INDEX IF NOT EXISTS ${CategoryRules.SORT_BY_ID} ON ${CURRENT_TABLE} USING btree (${CategoriesTable.ID} ASC);
 `,
 
-  insert: `INSERT INTO ${Tables.CATEGORIES}(${CategoriesTable.NAME}, ${CategoriesTable.PID}) VALUES ($1, $2) RETURNING *;`,
+  insert: `INSERT INTO ${CURRENT_TABLE}(${CategoriesTable.NAME}, ${CategoriesTable.PID}) VALUES ($1, $2) RETURNING *;`,
 
   update: `
-  UPDATE ${Tables.CATEGORIES}
+  UPDATE ${CURRENT_TABLE}
     SET 
         ${CategoriesTable.NAME} = COALESCE($2, ${CategoriesTable.NAME}),
         ${CategoriesTable.PID} =  CASE 
@@ -36,33 +38,33 @@ const categories = {
                                   END
     WHERE ${CategoriesTable.ID}=$1 RETURNING *;`,
 
-  delete: `DELETE FROM ${Tables.CATEGORIES}	WHERE ${CategoriesTable.ID}=$1;`,
+  delete: `DELETE FROM ${CURRENT_TABLE}	WHERE ${CategoriesTable.ID}=$1;`,
 
   selectAll: `
     SELECT
-      (SELECT COUNT(*) FROM ${Tables.CATEGORIES}) as count, 
+      (SELECT COUNT(*) FROM ${CURRENT_TABLE}) as count, 
       (SELECT json_agg(t.*) 
         FROM (
-          SELECT * FROM ${Tables.CATEGORIES}
+          SELECT * FROM ${CURRENT_TABLE}
           ORDER BY ${CategoriesTable.ID} ASC 
           LIMIT $1 
           OFFSET $2
         ) AS t
       ) AS rows;`,
 
-  select: `SELECT * FROM ${Tables.CATEGORIES} WHERE ${CategoriesTable.ID}=$1;`,
+  select: `SELECT * FROM ${CURRENT_TABLE} WHERE ${CategoriesTable.ID}=$1;`,
 
   selectRecursively: `
   WITH RECURSIVE r AS (
     SELECT ${CategoriesTable.ID}, ${CategoriesTable.PID}, ${CategoriesTable.NAME}, 1 AS level
-    FROM ${Tables.CATEGORIES}
+    FROM ${CURRENT_TABLE}
     WHERE ${CategoriesTable.ID} = $1
   
     UNION ALL
   
-    SELECT ${Tables.CATEGORIES}.${CategoriesTable.ID}, ${Tables.CATEGORIES}.${CategoriesTable.PID}, ${Tables.CATEGORIES}.${CategoriesTable.NAME}, r.level + 1 AS level
-    FROM ${Tables.CATEGORIES}
-      JOIN r ON ${Tables.CATEGORIES}.${CategoriesTable.ID} = r.${CategoriesTable.PID}
+    SELECT ${CURRENT_TABLE}.${CategoriesTable.ID}, ${CURRENT_TABLE}.${CategoriesTable.PID}, ${CURRENT_TABLE}.${CategoriesTable.NAME}, r.level + 1 AS level
+    FROM ${CURRENT_TABLE}
+      JOIN r ON ${CURRENT_TABLE}.${CategoriesTable.ID} = r.${CategoriesTable.PID}
   )
   SELECT * FROM r;
   `,
