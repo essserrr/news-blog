@@ -20,6 +20,7 @@ import {
   IsAdmin,
   AuthToken,
   Description,
+  OptionalDescription,
 } from './entities';
 
 type Require<T> = {
@@ -95,6 +96,7 @@ export type {
   IsAdmin,
   AuthToken,
   Description,
+  OptionalDescription,
 };
 export type { Offset, Limit };
 export type { DbPage, PaginatedResult, DatabaseOptionalValue };

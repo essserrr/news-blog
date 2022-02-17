@@ -9,6 +9,8 @@ import {
   Password,
   Avatar,
   AuthToken,
+  Description,
+  OptionalDescription,
 } from 'src/core/database';
 
 import { Validated, NotValidated } from './types';
@@ -80,17 +82,36 @@ const validateAuthToken = (name: unknown): AuthToken => {
   return name;
 };
 
+const validateDescription = (descr: unknown): Description => {
+  if (descr === null) return null;
+
+  if (!descr || typeof descr !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return descr;
+};
+
+const validateOptionalDescription = (descr: unknown): OptionalDescription => {
+  if (descr === null) return '(null_value)';
+  if (descr === undefined) return null;
+
+  if (!descr || typeof descr !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return descr;
+};
+
 const validators = {
   name: validateName,
-  optionalName: validateOptionalName,
   pid: validatePid,
-  optionalPid: validateOptionalPid,
-
   secondName: validateSecondName,
   username: validateUsername,
   password: validatePassword,
   avatar: validateAvatar,
   authToken: validateAuthToken,
+  description: validateDescription,
+
+  optionalName: validateOptionalName,
+  optionalPid: validateOptionalPid,
+  optionalDescription: validateOptionalDescription,
 } as const;
 
 interface ReqRes {
@@ -104,6 +125,9 @@ interface ReqRes {
   password: Password;
   avatar: Avatar;
   authToken: AuthToken;
+
+  description: Description;
+  optionalDescription: OptionalDescription;
 }
 
 type ReqParams = NotValidated<ReqRes>;

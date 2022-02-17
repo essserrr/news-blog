@@ -17,6 +17,7 @@ type IsAdmin = boolean;
 type AuthToken = string | null;
 
 type Description = string | null;
+type OptionalDescription = DatabaseOptionalValue<Description>;
 
 // params
 type Offset = number;
@@ -39,4 +40,5 @@ export type {
   IsAdmin,
   AuthToken,
   Description,
+  OptionalDescription,
 };
