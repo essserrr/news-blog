@@ -1,4 +1,5 @@
 import { Tables } from './tables';
+import { timestampToInteger } from './converters';
 
 enum UsersTable {
   UID = 'uid',
@@ -52,7 +53,9 @@ const users = {
           RETURNING *;`,
   delete: `DELETE FROM ${CURRENT_TABLE} WHERE ${UsersTable.UID}=$1;`,
 
-  select: `SELECT * FROM ${CURRENT_TABLE} WHERE ${UsersTable.UID}=$1;`,
+  select: `SELECT *, ${timestampToInteger(UsersTable.CREATED_AT)} FROM ${CURRENT_TABLE} WHERE ${
+    UsersTable.UID
+  }=$1;`,
 
   login: `UPDATE ${CURRENT_TABLE} SET ${UsersTable.AUTH_TOKEN}=$2 WHERE ${UsersTable.USERNAME}=$1 RETURNING *;`,
   logout: `UPDATE ${CURRENT_TABLE} SET ${UsersTable.AUTH_TOKEN}=NULL WHERE ${UsersTable.UID}=$1;`,

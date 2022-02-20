@@ -5,7 +5,7 @@ interface User {
   avatar: string | null;
   username: string;
   password: string;
-  createdAt: string;
+  createdAt: number;
   isAdmin: boolean;
   authToken: string | null;
 }
@@ -17,7 +17,7 @@ interface UserUnderscored {
   avatar: string | null;
   username: string;
   password: string;
-  created_at: string;
+  created_at: number;
   is_admin: boolean;
   auth_token: string | null;
 }
@@ -25,7 +25,7 @@ interface UserUnderscored {
 type UserPasswordReq = Pick<UserUnderscored, 'password' | 'auth_token' | 'is_admin'>;
 type UserAuthReq = Pick<UserUnderscored, 'auth_token' | 'is_admin' | 'uid'>;
 
-type MappedForeignUser = Omit<User, 'password' | 'authToken' | 'createdAt'>;
+type MappedForeignUser = Omit<User, 'password' | 'authToken'>;
 
 const mapForeignUser = ({
   uid,
@@ -33,6 +33,7 @@ const mapForeignUser = ({
   second_name,
   avatar,
   username,
+  created_at,
   is_admin,
 }: UserUnderscored): MappedForeignUser => ({
   uid,
@@ -40,6 +41,7 @@ const mapForeignUser = ({
   secondName: second_name,
   avatar,
   username,
+  createdAt: created_at,
   isAdmin: is_admin,
 });
 

@@ -12,7 +12,7 @@ type SecondName = string;
 type Avatar = string | null;
 type Username = string;
 type Password = string;
-type CreatedAt = string;
+type CreatedAt = number;
 type IsAdmin = boolean;
 type AuthToken = string | null;
 
