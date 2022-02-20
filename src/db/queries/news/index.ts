@@ -32,8 +32,7 @@ const news = {
     ${newsTags.createNewsTagsTable}
 `,
 
-  insert: (tags: Array<number>) =>
-    `
+  insert: `
   WITH 
       news_body AS ( 
           INSERT INTO ${CURRENT_TABLE} (
@@ -46,14 +45,36 @@ const news = {
         ),
 
       news_tags AS (
-        INSERT INTO ${Tables.NEWS_TAGS} (${NewsTagsTable.NID}, ${NewsTagsTable.ID}) VALUES 
-        ${tags.map((t) => `(news_body.id, ${t})`).join(', ')} RETURNING ${NewsTagsTable.ID};
+        INSERT INTO ${Tables.NEWS_TAGS} (${NewsTagsTable.NID}, ${NewsTagsTable.ID}) 
+        SELECT news_body.id, unnest($6::integer[]) FROM news_body 
+        RETURNING ${NewsTagsTable.ID}
       )
 
 
-      SELECT news_body.* as news, news_tags.* as "tags"
-      FROM   news_body JOIN news_tags
+  SELECT news_body.*, ${timestampToInteger(
+    `news_body.${NewsTable.CREATED_AT}`,
+    NewsTable.CREATED_AT,
+  )}, json_agg(json_build_object(
+    '${NewsTagsTable.ID}', news_tags.${NewsTagsTable.ID}
+  )) AS tags
+      FROM news_body, news_tags
+      GROUP BY news_body.id, news_body.author, news_body.title, news_body.content, news_body.category, news_body.main_image, news_body.created_at
 ` as const,
+
+  /*
+SELECT json_agg(each_table_rows.data) FROM (
+        SELECT json_build_object('body',tbl1.*) AS data
+        FROM (
+          SELECT t1.* FROM news_body t1
+        ) tbl1
+        UNION ALL
+        SELECT json_build_object('tags',tbl2.*)
+        FROM (
+          SELECT t2.* FROM news_tags t2
+        ) tbl2
+      ) each_table_rows;
+
+*/
 
   delete: `DELETE FROM ${CURRENT_TABLE} WHERE ${NewsTable.ID}=$1;`,
 

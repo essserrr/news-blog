@@ -9,14 +9,13 @@ const addNews =
   async ({ tags, author, title, content, category, mainImage }) => {
     logger.debug(`Adding news: ${title} from ${author}`);
 
-    const addNewsQuery = queries.news.insert(tags);
-
-    const res: QueryResult<NewsUnderscored> = await pool.query(addNewsQuery, [
+    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.insert, [
       author,
       title,
       content,
       category,
       mainImage,
+      tags,
     ]);
 
     const news = res.rows[0];

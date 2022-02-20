@@ -5,7 +5,8 @@ import { validateReq, validateQuery } from 'src/core/validation';
 
 const add: Handler = (app) => async (req, res) => {
   try {
-    if (res.locals?.auth?.uid === req.params.id) throw new AppError({ code: 'FORBIDDEN' });
+    if (res.locals?.auth?.uid !== req.params.id) throw new AppError({ code: 'FORBIDDEN' });
+
     const { uid } = validateQuery({ uid: req.params.id });
 
     const { title, content, category, tags, mainImage, auxImages }: NewsInsertBody = req.body || {};

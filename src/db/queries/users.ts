@@ -50,7 +50,7 @@ const users = {
                 ${UsersTable.PASSWORD},
                 ${UsersTable.AUTH_TOKEN}
           ) VALUES ($1, $2, $3, $4, $5, $6) 
-          RETURNING *;`,
+          RETURNING *, ${timestampToInteger(UsersTable.CREATED_AT)};`,
   delete: `DELETE FROM ${CURRENT_TABLE} WHERE ${UsersTable.UID}=$1;`,
 
   select: `SELECT *, ${timestampToInteger(UsersTable.CREATED_AT)} FROM ${CURRENT_TABLE} WHERE ${
