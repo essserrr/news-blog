@@ -20,11 +20,12 @@ const login = async (app: App, req: Request): Promise<AuthStatus> => {
     is_admin: isAdmin,
     auth_token: authToken,
     password: targetPassword,
+    uid: targetUid,
   } = await app.db.auth.checkPass(username);
 
   const passwordsMatch = await compare(passwordValidated, targetPassword);
   return passwordsMatch
-    ? { loggedIn: true, isAdmin, authToken }
+    ? { loggedIn: true, isAdmin, authToken, uid: targetUid }
     : { loggedIn: false, isAdmin: false };
 };
 

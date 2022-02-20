@@ -19,7 +19,7 @@ enum UserRules {
 }
 
 const userResponses = {
-  checkPass: `${UsersTable.PASSWORD}, ${UsersTable.AUTH_TOKEN}, ${UsersTable.IS_ADMIN}`,
+  checkPass: `${UsersTable.PASSWORD}, ${UsersTable.AUTH_TOKEN}, ${UsersTable.IS_ADMIN}, ${UsersTable.UID}`,
   checkToken: `${UsersTable.AUTH_TOKEN}, ${UsersTable.IS_ADMIN}, ${UsersTable.UID}`,
 } as const;
 

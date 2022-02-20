@@ -18,12 +18,16 @@ const authenticate = async (app: App, req: Request): Promise<AuthStatus> => {
   const { authToken: authTokenValidated } = validateReq({ authToken });
   app.logger.debug(`Log in attempt from: ${uidValidated}`);
 
-  const { is_admin: isAdmin, auth_token: targetAuthToken } = await app.db.auth.checkToken(
-    uidValidated,
-  );
+  const {
+    is_admin: isAdmin,
+    auth_token: targetAuthToken,
+    uid: targetUid,
+  } = await app.db.auth.checkToken(uidValidated);
 
   const tokensMatch = authTokenValidated === targetAuthToken;
-  return tokensMatch ? { loggedIn: true, isAdmin, authToken } : { loggedIn: false, isAdmin: false };
+  return tokensMatch
+    ? { loggedIn: true, isAdmin, authToken, uid: targetUid }
+    : { loggedIn: false, isAdmin: false };
 };
 
 const authAdminMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, res, next) => {

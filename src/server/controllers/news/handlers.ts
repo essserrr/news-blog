@@ -1,10 +1,11 @@
 import { NewsInsertBody } from 'src/core/remote-client';
 import { Handler, respondWithError } from 'src/core/server';
-import { getTypedError } from 'src/core/errors';
+import { getTypedError, AppError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 
 const add: Handler = (app) => async (req, res) => {
   try {
+    if (res.locals?.auth?.uid === req.params.id) throw new AppError({ code: 'FORBIDDEN' });
     const { uid } = validateQuery({ uid: req.params.id });
 
     const { title, content, category, tags, mainImage, auxImages }: NewsInsertBody = req.body || {};

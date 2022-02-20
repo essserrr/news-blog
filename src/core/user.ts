@@ -22,7 +22,7 @@ interface UserUnderscored {
   auth_token: string | null;
 }
 
-type UserPasswordReq = Pick<UserUnderscored, 'password' | 'auth_token' | 'is_admin'>;
+type UserPasswordReq = Pick<UserUnderscored, 'password' | 'auth_token' | 'is_admin' | 'uid'>;
 type UserAuthReq = Pick<UserUnderscored, 'auth_token' | 'is_admin' | 'uid'>;
 
 type MappedForeignUser = Omit<User, 'password' | 'authToken'>;
