@@ -9,6 +9,7 @@ import initCategoryRouter from './controllers/category';
 import initUsers from './controllers/users';
 import initAuth from './controllers/auth';
 import initAuthors from './controllers/authors';
+import initNews from './controllers/news';
 import { notFound } from './controllers/not-found';
 
 interface InitServerProps {
@@ -30,6 +31,7 @@ const initServer = ({ app, secretKey }: InitServerProps) => {
   server.use('/users', initUsers(app));
   server.use('/auth', initAuth(app));
   server.use('/authors', initAuthors(app));
+  server.use('/news', initNews(app));
 
   server.get('*', notFound(app));
 

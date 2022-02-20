@@ -1,6 +1,4 @@
 import { Tables } from '../tables';
-import { TagsTable } from '../tags';
-import { NewsTable } from '.';
 
 enum NewsTagsTable {
   NID = 'nid',
@@ -20,11 +18,13 @@ const bulkInsert = (nid: string, tags: Array<{ id: number }>) =>
 
 const newsTags = {
   createNewsTagsTable: `CREATE TABLE IF NOT EXISTS ${CURRENT_TABLE}(
-        ${NewsTagsTable.NID} serial NOT NULL REFERENCES ${Tables.NEWS} (${NewsTable.ID}) ON DELETE CASCADE,
-        ${NewsTagsTable.ID} serial NOT NULL REFERENCES ${Tables.TAGS} (${TagsTable.ID}) ON DELETE CASCADE
+        ${NewsTagsTable.NID} serial NOT NULL REFERENCES ${Tables.NEWS} (${'id'}) ON DELETE CASCADE,
+        ${NewsTagsTable.ID} serial NOT NULL REFERENCES ${Tables.TAGS} (${'id'}) ON DELETE CASCADE
     );
 
-    CREATE INDEX IF NOT EXISTS ${TagRules.SORT_BY_NID} ON ${CURRENT_TABLE} USING btree (${NewsTagsTable.NID} ASC);
+    CREATE INDEX IF NOT EXISTS ${TagRules.SORT_BY_NID} ON ${CURRENT_TABLE} USING btree (${
+    NewsTagsTable.NID
+  } ASC);
 `,
 
   select: `SELECT ${NewsTagsTable.ID} FROM ${CURRENT_TABLE} WHERE ${NewsTagsTable.NID}=$1;`,

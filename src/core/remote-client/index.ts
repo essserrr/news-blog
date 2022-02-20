@@ -15,6 +15,15 @@ type AuthorWithoutUid = Omit<Author, 'uid'>;
 type AuthorInsertBody = AuthorWithoutUid;
 type AuthorUpdateBody = Partial<AuthorWithoutUid>;
 
+interface NewsInsertBody {
+  title: string;
+  content: string;
+  category: number;
+  tags: Array<number>;
+  mainImage: string;
+  auxImages: Array<string>;
+}
+
 export type {
   TagBody,
   CategoryInsertBody,
@@ -22,4 +31,5 @@ export type {
   UserSignupBody,
   AuthorInsertBody,
   AuthorUpdateBody,
+  NewsInsertBody,
 };

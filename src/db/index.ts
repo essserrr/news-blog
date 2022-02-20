@@ -13,6 +13,7 @@ import {
 import { signup, getUser, removeUser } from './actions/users';
 import { login, logout, checkPass, checkToken } from './actions/auth';
 import { addAuthor, updateAuthor, getAuthor, removeAuthor, getAllAuthors } from './actions/authors';
+import { addNews } from './actions/news';
 
 import { DbInstance } from './types';
 import queries from './queries';
@@ -61,6 +62,9 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       add: addAuthor(instance),
       update: updateAuthor(instance),
       remove: removeAuthor(instance),
+    },
+    news: {
+      add: addNews(instance),
     },
   };
 };

@@ -11,9 +11,18 @@ import {
   AuthToken,
   Description,
   OptionalDescription,
+  Title,
+  Content,
+  Id,
+  Image,
 } from 'src/core/database';
 
 import { Validated, NotValidated } from './types';
+
+const multiple =
+  <T>(validator: (value: unknown) => T) =>
+  (values: Array<unknown>): Array<T> =>
+    values.map((v) => validator(v));
 
 const validateName = (name: unknown): Name => {
   if (!name || typeof name !== 'string')
@@ -99,6 +108,31 @@ const validateOptionalDescription = (descr: unknown): OptionalDescription => {
   return descr;
 };
 
+const validateTitle = (title: unknown): Title => {
+  if (!title || typeof title !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return title;
+};
+
+const validateContent = (title: unknown): Content => {
+  if (!title || typeof title !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return title;
+};
+
+const validateImage = (title: unknown): Image => {
+  if (!title || typeof title !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return title;
+};
+
+const validateId = (id: unknown): Id => {
+  const idParsed = Number(id);
+  if (Number.isNaN(idParsed) || idParsed < 0)
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return idParsed;
+};
+
 const validators = {
   name: validateName,
   pid: validatePid,
@@ -112,6 +146,13 @@ const validators = {
   optionalName: validateOptionalName,
   optionalPid: validateOptionalPid,
   optionalDescription: validateOptionalDescription,
+
+  title: validateTitle,
+  content: validateContent,
+  categoryId: validateId,
+  tagIds: multiple(validateId),
+  mainImage: validateImage,
+  auxImages: multiple(validateImage),
 } as const;
 
 interface ReqRes {
@@ -128,6 +169,13 @@ interface ReqRes {
 
   description: Description;
   optionalDescription: OptionalDescription;
+
+  title: Title;
+  content: Content;
+  categoryId: Id;
+  tagIds: Array<Id>;
+  mainImage: string;
+  auxImages: Array<string>;
 }
 
 type ReqParams = NotValidated<ReqRes>;

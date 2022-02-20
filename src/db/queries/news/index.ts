@@ -19,7 +19,7 @@ enum NewsRules {}
 
 const CURRENT_TABLE = Tables.NEWS;
 
-const users = {
+const news = {
   createNewsTable: `CREATE TABLE IF NOT EXISTS ${CURRENT_TABLE}(
         ${NewsTable.ID} bigserial NOT NULL PRIMARY KEY,
         ${NewsTable.AUTHOR} bigserial REFERENCES ${Tables.AUTHORS} (${AuthorsTable.UID}) ON DELETE SET NULL,
@@ -32,7 +32,8 @@ const users = {
     ${newsTags.createNewsTagsTable}
 `,
 
-  insert: (tags: Array<number>) => `
+  insert: (tags: Array<number>) =>
+    `
   WITH 
       news_body AS ( 
           INSERT INTO ${CURRENT_TABLE} (
@@ -52,7 +53,7 @@ const users = {
 
       SELECT news_body.* as news, news_tags.* as "tags"
       FROM   news_body JOIN news_tags
-`,
+` as const,
 
   delete: `DELETE FROM ${CURRENT_TABLE} WHERE ${NewsTable.ID}=$1;`,
 
@@ -81,4 +82,4 @@ const users = {
                       ) AS rows;`,
 } as const;
 
-export { NewsTable, NewsRules, users };
+export { NewsTable, NewsRules, news };

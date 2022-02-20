@@ -19,6 +19,10 @@ type AuthToken = string | null;
 type Description = string | null;
 type OptionalDescription = DatabaseOptionalValue<Description>;
 
+type Title = string;
+type Content = string;
+type Image = string;
+
 // params
 type Offset = number;
 type Limit = number | null;
@@ -41,4 +45,7 @@ export type {
   AuthToken,
   Description,
   OptionalDescription,
+  Title,
+  Content,
+  Image,
 };

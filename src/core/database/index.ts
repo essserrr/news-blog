@@ -2,6 +2,7 @@ import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
 import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
 import { Author } from 'src/core/authors';
+import { NewsUnderscored, NewsRequest } from 'src/core/news';
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import {
   Id,
@@ -21,6 +22,9 @@ import {
   AuthToken,
   Description,
   OptionalDescription,
+  Title,
+  Content,
+  Image,
 } from './entities';
 
 type Require<T> = {
@@ -74,6 +78,9 @@ interface Database {
     get: (uid: Uid) => Promise<Author>;
     getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<Author>>;
   };
+  news: {
+    add: (options: NewsRequest) => Promise<NewsUnderscored>;
+  };
 }
 
 interface DatabaseConfig {
@@ -97,6 +104,9 @@ export type {
   AuthToken,
   Description,
   OptionalDescription,
+  Title,
+  Content,
+  Image,
 };
 export type { Offset, Limit };
 export type { DbPage, PaginatedResult, DatabaseOptionalValue };
