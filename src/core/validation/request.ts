@@ -181,7 +181,7 @@ interface ReqRes {
 type ReqParams = NotValidated<ReqRes>;
 
 const validateReq = <T extends ReqParams>(params: T): Validated<T, ReqRes> => {
-  const paramsEntries = Object.entries(params) as Array<[keyof Validated<T, ReqRes>, unknown]>;
+  const paramsEntries = Object.entries(params) as Array<[keyof Validated<T, ReqRes>, any]>;
 
   return paramsEntries.reduce((sum, [key, value]) => {
     const validator = validators[key];
