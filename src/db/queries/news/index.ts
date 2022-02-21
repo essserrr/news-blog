@@ -4,103 +4,101 @@ import { CategoriesTable } from '../categories';
 import { timestampToInteger } from '../converters';
 
 import { newsTags, NewsTagsTable } from './news-tags';
+import { newsBody, NewsBodyTable } from './news-body';
 
-enum NewsTable {
-  ID = 'id',
-  AUTHOR = 'author',
-  TITLE = 'title',
-  CONTENT = 'content',
-  CATEGORY = 'category',
-  MAIN_IMAGE = 'main_image',
-  CREATED_AT = 'created_at',
+enum NewsParts {
+  BODY = 'news_body',
+  TAGS = 'news_tags_list',
 }
 
-enum NewsRules {}
+const bodyEntities = {
+  ALL: `${NewsParts.BODY}.*`,
+  ID: `${NewsParts.BODY}.${NewsBodyTable.ID}`,
+  AUTHOR: `${NewsParts.BODY}.${NewsBodyTable.AUTHOR}`,
+  TITLE: `${NewsParts.BODY}.${NewsBodyTable.TITLE}`,
+  CONTENT: `${NewsParts.BODY}.${NewsBodyTable.CONTENT}`,
+  CATEGORY: `${NewsParts.BODY}.${NewsBodyTable.CATEGORY}`,
+  MAIN_IMAGE: `${NewsParts.BODY}.${NewsBodyTable.MAIN_IMAGE}`,
+  CREATED_AT: `${NewsParts.BODY}.${NewsBodyTable.CREATED_AT}`,
+} as const;
 
-const CURRENT_TABLE = Tables.NEWS;
+const tagsEntities = {
+  ALL: `${NewsParts.TAGS}.*`,
+  ID: `${NewsParts.TAGS}.${NewsTagsTable.ID}`,
+  NID: `${NewsParts.TAGS}.${NewsTagsTable.NID}`,
+} as const;
+
+const newsRules = {
+  group: `
+    ${bodyEntities.ID}, 
+    ${bodyEntities.AUTHOR}, 
+    ${bodyEntities.TITLE}, 
+    ${bodyEntities.CONTENT}, 
+    ${bodyEntities.CATEGORY}, 
+    ${bodyEntities.MAIN_IMAGE}, 
+    ${bodyEntities.CREATED_AT}
+`,
+} as const;
 
 const news = {
-  createNewsTable: `CREATE TABLE IF NOT EXISTS ${CURRENT_TABLE}(
-        ${NewsTable.ID} bigserial NOT NULL PRIMARY KEY,
-        ${NewsTable.AUTHOR} bigserial REFERENCES ${Tables.AUTHORS} (${AuthorsTable.UID}) ON DELETE SET NULL,
-        ${NewsTable.TITLE} text NOT NULL,
-        ${NewsTable.CONTENT} text NOT NULL,
-        ${NewsTable.CATEGORY} serial REFERENCES ${Tables.CATEGORIES} (${CategoriesTable.ID}) ON DELETE SET NULL,
-        ${NewsTable.MAIN_IMAGE} text NOT NULL,
-        ${NewsTable.CREATED_AT} TIMESTAMP NOT NULL DEFAULT NOW()
-    );
+  createNewsTable: `
+    ${newsBody.createNewsTable}
     ${newsTags.createNewsTagsTable}
-`,
+  `,
 
   insert: `
-  WITH 
-      news_body AS ( 
-          INSERT INTO ${CURRENT_TABLE} (
-            ${NewsTable.AUTHOR}, 
-            ${NewsTable.TITLE}, 
-            ${NewsTable.CONTENT}, 
-            ${NewsTable.CATEGORY}, 
-            ${NewsTable.MAIN_IMAGE}
+    WITH 
+      ${NewsParts.BODY} AS ( 
+          INSERT INTO ${Tables.NEWS} (
+            ${NewsBodyTable.AUTHOR}, 
+            ${NewsBodyTable.TITLE}, 
+            ${NewsBodyTable.CONTENT}, 
+            ${NewsBodyTable.CATEGORY}, 
+            ${NewsBodyTable.MAIN_IMAGE}
           ) VALUES ($1, $2, $3, $4, $5) RETURNING *
         ),
 
-      news_tags AS (
+      ${NewsParts.TAGS} AS (
         INSERT INTO ${Tables.NEWS_TAGS} (${NewsTagsTable.NID}, ${NewsTagsTable.ID}) 
-        SELECT news_body.id, unnest($6::integer[]) FROM news_body 
+        SELECT ${bodyEntities.ID}, unnest($6::integer[]) FROM ${NewsParts.BODY} 
         RETURNING ${NewsTagsTable.ID}
       )
-
-
-  SELECT news_body.*, ${timestampToInteger(
-    `news_body.${NewsTable.CREATED_AT}`,
-    NewsTable.CREATED_AT,
+      
+    SELECT ${bodyEntities.ALL}, ${timestampToInteger(
+    `${bodyEntities.CREATED_AT}`,
+    NewsBodyTable.CREATED_AT,
   )}, json_agg(json_build_object(
-    '${NewsTagsTable.ID}', news_tags.${NewsTagsTable.ID}
-  )) AS tags
-      FROM news_body, news_tags
-      GROUP BY news_body.id, news_body.author, news_body.title, news_body.content, news_body.category, news_body.main_image, news_body.created_at
+      '${NewsTagsTable.ID}',  ${tagsEntities.ID}
+    )) AS tags
+        FROM ${NewsParts.BODY}, ${NewsParts.TAGS}
+        GROUP BY ${newsRules.group}
 ` as const,
 
-  /*
-SELECT json_agg(each_table_rows.data) FROM (
-        SELECT json_build_object('body',tbl1.*) AS data
-        FROM (
-          SELECT t1.* FROM news_body t1
-        ) tbl1
-        UNION ALL
-        SELECT json_build_object('tags',tbl2.*)
-        FROM (
-          SELECT t2.* FROM news_tags t2
-        ) tbl2
-      ) each_table_rows;
+  delete: `DELETE FROM ${Tables.NEWS} WHERE ${NewsBodyTable.ID}=$1;`,
 
-*/
-
-  delete: `DELETE FROM ${CURRENT_TABLE} WHERE ${NewsTable.ID}=$1;`,
-
-  select: `SELECT *, ${timestampToInteger(NewsTable.CREATED_AT)} FROM ${CURRENT_TABLE} WHERE ${
-    NewsTable.ID
+  select: `SELECT *, ${timestampToInteger(NewsBodyTable.CREATED_AT)} FROM ${Tables.NEWS} WHERE ${
+    NewsBodyTable.ID
   }=$1;`,
 
   update: `
-              UPDATE ${CURRENT_TABLE}
+              UPDATE ${Tables.NEWS}
                 SET 
-                    ${NewsTable.AUTHOR} = COALESCE($2, ${NewsTable.AUTHOR}),
-                    ${NewsTable.TITLE} = COALESCE($3, ${NewsTable.TITLE}),
-                    ${NewsTable.CONTENT} = COALESCE($4, ${NewsTable.CONTENT}),
-                    ${NewsTable.CATEGORY} = COALESCE($5, ${NewsTable.CATEGORY}),
-                    ${NewsTable.MAIN_IMAGE} = COALESCE($6, ${NewsTable.MAIN_IMAGE})
-                WHERE ${NewsTable.ID}=$1 
+                    ${NewsBodyTable.AUTHOR} = COALESCE($2, ${NewsBodyTable.AUTHOR}),
+                    ${NewsBodyTable.TITLE} = COALESCE($3, ${NewsBodyTable.TITLE}),
+                    ${NewsBodyTable.CONTENT} = COALESCE($4, ${NewsBodyTable.CONTENT}),
+                    ${NewsBodyTable.CATEGORY} = COALESCE($5, ${NewsBodyTable.CATEGORY}),
+                    ${NewsBodyTable.MAIN_IMAGE} = COALESCE($6, ${NewsBodyTable.MAIN_IMAGE})
+                WHERE ${NewsBodyTable.ID}=$1 
                 RETURNING *;`,
 
   selectAll: `
                     SELECT
-                      (SELECT COUNT(*) FROM ${CURRENT_TABLE}) as count, 
+                      (SELECT COUNT(*) FROM ${Tables.NEWS}) as count, 
                       (SELECT json_agg(t.*) 
                         FROM (
-                          SELECT * FROM ${CURRENT_TABLE} ORDER BY ${NewsTable.ID} ASC LIMIT $1 OFFSET $2
+                          SELECT * FROM ${Tables.NEWS} ORDER BY ${NewsBodyTable.ID} ASC LIMIT $1 OFFSET $2
                         ) AS t
                       ) AS rows;`,
 } as const;
 
-export { NewsTable, NewsRules, news };
+export { NewsBodyTable, NewsRules, news };
