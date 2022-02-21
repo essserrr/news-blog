@@ -29,7 +29,6 @@ const bodyPart = {
 const tagsPart = {
   ALL: `${Parts.TAGS}.*`,
   ID: `${Parts.TAGS}.${TagsSubTable.ID}`,
-  NID: `${Parts.TAGS}.${TagsSubTable.NID}`,
 } as const;
 
 const authorPart = {
@@ -74,14 +73,31 @@ const news = {
         INSERT INTO ${Tables.NEWS_TAGS} (${TagsSubTable.NID}, ${TagsSubTable.ID}) 
         SELECT ${bodyPart.ID}, unnest($6::integer[]) FROM ${Parts.BODY} 
         RETURNING ${TagsSubTable.ID}
+      ),
+
+      ${Parts.TAGS_FULL} AS (
+        SELECT * FROM ${Parts.TAGS} 
+        LEFT JOIN ${Tables.TAGS}
+          ON ${tagsPart.ID} = ${Tables.TAGS}.${TagsTable.ID}
+      ),
+
+      ${Parts.AUTHOR} AS (
+        SELECT ${author} FROM ${Parts.BODY} 
+
+        LEFT JOIN ${Tables.AUTHORS}
+          ON ${bodyPart.AUTHOR} = ${Tables.AUTHORS}.${AuthorsTable.UID}
+        LEFT JOIN ${Tables.USERS}
+          ON ${bodyPart.AUTHOR} = ${Tables.USERS}.${UsersTable.UID}
       )
       
     SELECT 
-        ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)}, 
-        json_agg(json_build_object('${TagsSubTable.ID}',  ${tagsPart.ID})) AS tags
-        FROM ${Parts.BODY}, ${Parts.TAGS}
-    GROUP BY ${newsRules.group};
-` as const,
+      ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)}, 
+      json_agg(${tagsFullPart.ALL}) AS tags,
+      to_json(${authorPart.ALL}) AS author
+
+    FROM ${Parts.BODY}, ${Parts.TAGS_FULL}, ${Parts.AUTHOR}
+
+    GROUP BY ${newsRules.group}, ${authorPart.ALL};`,
 
   select: `
         WITH 
@@ -140,4 +156,4 @@ const news = {
                       ) AS rows;`,
 } as const;
 
-export { NewsTable, newsRules, news };
+export { NewsTable, news };
