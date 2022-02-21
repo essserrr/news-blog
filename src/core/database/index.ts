@@ -80,6 +80,7 @@ interface Database {
   };
   news: {
     add: (options: NewsRequest) => Promise<NewsUnderscored>;
+    get: (uid: Uid) => Promise<NewsUnderscored>;
   };
 }
 

@@ -23,4 +23,16 @@ const addNews =
     return news;
   };
 
-export { addNews };
+const getNews =
+  ({ logger, pool, queries }: DbInstance): Database['news']['get'] =>
+  async (uid) => {
+    logger.debug(`Getting news: ${uid}`);
+
+    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.select, [uid]);
+
+    const news = res.rows[0];
+    if (!news) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });
+    return news;
+  };
+
+export { addNews, getNews };

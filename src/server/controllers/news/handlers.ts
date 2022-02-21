@@ -42,4 +42,16 @@ const add: Handler = (app) => async (req, res) => {
   }
 };
 
-export { add };
+const get: Handler = (app) => async (req, res) => {
+  try {
+    const { uid } = validateQuery({ uid: req.params.id });
+
+    const data = await app.db.news.get(uid);
+
+    res.send({ data });
+  } catch (e) {
+    respondWithError(app, res, getTypedError(e));
+  }
+};
+
+export { add, get };
