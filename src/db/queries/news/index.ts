@@ -3,6 +3,7 @@ import { timestampToInteger } from '../converters';
 import { AuthorsTable } from '../authors';
 import { TagsTable } from '../tags';
 import { UsersTable } from '../users';
+import { CategoriesTable } from '../categories';
 
 import { newsTags, TagsSubTable } from './news-tags';
 import { newsBody, NewsTable } from './news-body';
@@ -20,6 +21,7 @@ enum Parts {
   TAGS = 'news_tags_list',
   TAGS_FULL = 'news_tags_list_full',
   IMAGES = 'news_aux_images_list',
+  CATEGORIES = 'news_categories_list',
 }
 
 const bodyPart = {
@@ -47,6 +49,15 @@ const imagesPart = {
   ALL: `${Parts.IMAGES}.*`,
 } as const;
 
+enum Recursive {
+  LEVEL = 'level',
+}
+
+const categoriesPart = {
+  ALL: `${Parts.CATEGORIES}.*`,
+  LEVEL: `${Parts.CATEGORIES}.${Recursive.LEVEL}`,
+} as const;
+
 const news = {
   createNewsTable: `
     ${newsBody.createNewsTable}
@@ -55,7 +66,7 @@ const news = {
   `,
 
   insert: `
-    WITH 
+    WITH RECURSIVE
       ${Parts.BODY} AS ( 
           INSERT INTO ${Tables.NEWS} (
             ${NewsTable.AUTHOR}, 
@@ -78,6 +89,32 @@ const news = {
           ON ${tagsPart.ID} = ${Tables.TAGS}.${TagsTable.ID}
       ),
 
+      ${Parts.CATEGORIES} AS (
+        SELECT 
+          ${Tables.CATEGORIES}.${CategoriesTable.ID},
+          ${Tables.CATEGORIES}.${CategoriesTable.PID},
+          ${Tables.CATEGORIES}.${CategoriesTable.NAME},
+          1 AS ${Recursive.LEVEL}
+        FROM ${Parts.BODY} 
+        LEFT JOIN ${Tables.CATEGORIES}
+          ON ${bodyPart.CATEGORY} = ${Tables.CATEGORIES}.${CategoriesTable.ID}
+        
+      
+        UNION ALL
+      
+        SELECT 
+          ${Tables.CATEGORIES}.${CategoriesTable.ID}, 
+          ${Tables.CATEGORIES}.${CategoriesTable.PID}, 
+          ${Tables.CATEGORIES}.${CategoriesTable.NAME}, 
+          ${categoriesPart.LEVEL} + 1 AS ${Recursive.LEVEL}
+        FROM ${Tables.CATEGORIES}
+        JOIN ${Parts.CATEGORIES} 
+        ON 
+          ${Tables.CATEGORIES}.${CategoriesTable.ID} 
+          = 
+          ${Parts.CATEGORIES}.${CategoriesTable.PID}
+      ),
+
       ${Parts.IMAGES} AS (
         INSERT INTO ${Tables.NEWS_IMAGES} (${ImagesSubTable.NID}, ${ImagesSubTable.PATH}) 
         SELECT ${bodyPart.ID}, unnest($7::text[]) FROM ${Parts.BODY} 
@@ -98,12 +135,14 @@ const news = {
     SELECT 
       ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)},
       (SELECT to_json(${authorPart.ALL}) FROM ${Parts.AUTHOR}) AS ${NewsTable.AUTHOR},
+      (SELECT json_agg(${categoriesPart.ALL}) 
+          FROM ${Parts.CATEGORIES}) AS ${NewsTable.CATEGORY},
       (SELECT json_agg(${imagesPart.ALL}) FROM ${Parts.IMAGES}) AS ${NewsFields.AUX_IMAGES},
       (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
     FROM ${Parts.BODY};`,
 
   select: `
-        WITH 
+        WITH RECURSIVE
           ${Parts.BODY} AS ( 
             SELECT * FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1
           ),
@@ -114,6 +153,32 @@ const news = {
 
           ${Parts.TAGS} AS (
             SELECT ${TagsSubTable.ID} FROM ${Tables.NEWS_TAGS} WHERE ${TagsSubTable.NID}=$1
+          ),
+
+        ${Parts.CATEGORIES} AS (
+            SELECT 
+              ${Tables.CATEGORIES}.${CategoriesTable.ID},
+              ${Tables.CATEGORIES}.${CategoriesTable.PID},
+              ${Tables.CATEGORIES}.${CategoriesTable.NAME},
+              1 AS ${Recursive.LEVEL}
+            FROM ${Parts.BODY} 
+            LEFT JOIN ${Tables.CATEGORIES}
+              ON ${bodyPart.CATEGORY} = ${Tables.CATEGORIES}.${CategoriesTable.ID}
+            
+          
+            UNION ALL
+          
+            SELECT 
+              ${Tables.CATEGORIES}.${CategoriesTable.ID}, 
+              ${Tables.CATEGORIES}.${CategoriesTable.PID}, 
+              ${Tables.CATEGORIES}.${CategoriesTable.NAME}, 
+              ${categoriesPart.LEVEL} + 1 AS ${Recursive.LEVEL}
+            FROM ${Tables.CATEGORIES}
+            JOIN ${Parts.CATEGORIES} 
+            ON 
+              ${Tables.CATEGORIES}.${CategoriesTable.ID} 
+              = 
+              ${Parts.CATEGORIES}.${CategoriesTable.PID}
           ),
 
           ${Parts.TAGS_FULL} AS (
@@ -134,6 +199,8 @@ const news = {
         SELECT 
           ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)},
           (SELECT to_json(${authorPart.ALL}) FROM ${Parts.AUTHOR}) AS ${NewsTable.AUTHOR},
+          (SELECT json_agg(${categoriesPart.ALL}) 
+              FROM ${Parts.CATEGORIES}) AS ${NewsTable.CATEGORY},
           (SELECT json_agg(${imagesPart.ALL}) FROM ${Parts.IMAGES}) AS ${NewsFields.AUX_IMAGES},
           (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
         FROM ${Parts.BODY};`,

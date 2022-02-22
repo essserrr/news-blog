@@ -6,14 +6,6 @@ enum ImagesSubTable {
   PATH = 'path',
 }
 
-/*
-        SELECT ${bodyPart.ALL} FROM ${Parts.BODY}
-          (SELECT to_json(${authorPart.ALL}) FROM ${Parts.AUTHOR}) AS ${NewsTable.AUTHOR},
-          (SELECT json_agg(${imagesPart.ALL}) FROM ${Parts.IMAGES}) AS ${NewsFields.AUX_IMAGES},
-          (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
-
-*/
-
 enum ImagesRules {
   SORT_BY_NID = 'news_images_nid_sort_asc',
 }
