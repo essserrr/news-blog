@@ -6,7 +6,7 @@ import { DbInstance } from '../types';
 
 const addNews =
   ({ logger, pool, queries }: DbInstance): Database['news']['add'] =>
-  async ({ tags, author, title, content, category, mainImage }) => {
+  async ({ tags, author, title, content, category, mainImage, auxImages }) => {
     logger.debug(`Adding news: ${title} from ${author}`);
 
     const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.insert, [
@@ -16,6 +16,7 @@ const addNews =
       category,
       mainImage,
       tags,
+      auxImages,
     ]);
 
     const news = res.rows[0];

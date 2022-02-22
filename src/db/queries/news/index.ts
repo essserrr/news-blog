@@ -6,23 +6,27 @@ import { UsersTable } from '../users';
 
 import { newsTags, TagsSubTable } from './news-tags';
 import { newsBody, NewsTable } from './news-body';
+import { newsImages, ImagesSubTable } from './news-images';
 import { author } from './news-author';
+
+enum NewsFields {
+  TAGS = 'tags',
+  AUX_IMAGES = 'aux_images',
+}
 
 enum Parts {
   BODY = 'news_body',
   AUTHOR = 'news_author',
   TAGS = 'news_tags_list',
   TAGS_FULL = 'news_tags_list_full',
+  IMAGES = 'news_aux_images_list',
 }
 
 const bodyPart = {
   ALL: `${Parts.BODY}.*`,
   ID: `${Parts.BODY}.${NewsTable.ID}`,
   AUTHOR: `${Parts.BODY}.${NewsTable.AUTHOR}`,
-  TITLE: `${Parts.BODY}.${NewsTable.TITLE}`,
-  CONTENT: `${Parts.BODY}.${NewsTable.CONTENT}`,
   CATEGORY: `${Parts.BODY}.${NewsTable.CATEGORY}`,
-  MAIN_IMAGE: `${Parts.BODY}.${NewsTable.MAIN_IMAGE}`,
   CREATED_AT: `${Parts.BODY}.${NewsTable.CREATED_AT}`,
 } as const;
 
@@ -39,22 +43,15 @@ const tagsFullPart = {
   ALL: `${Parts.TAGS_FULL}.*`,
 } as const;
 
-const newsRules = {
-  group: `
-    ${bodyPart.ID}, 
-    ${bodyPart.AUTHOR}, 
-    ${bodyPart.TITLE}, 
-    ${bodyPart.CONTENT}, 
-    ${bodyPart.CATEGORY}, 
-    ${bodyPart.MAIN_IMAGE}, 
-    ${bodyPart.CREATED_AT}
-`,
+const imagesPart = {
+  ALL: `${Parts.IMAGES}.*`,
 } as const;
 
 const news = {
   createNewsTable: `
     ${newsBody.createNewsTable}
     ${newsTags.createTagsSubTable}
+    ${newsImages.createImagesSubTable}
   `,
 
   insert: `
@@ -81,6 +78,12 @@ const news = {
           ON ${tagsPart.ID} = ${Tables.TAGS}.${TagsTable.ID}
       ),
 
+      ${Parts.IMAGES} AS (
+        INSERT INTO ${Tables.NEWS_IMAGES} (${ImagesSubTable.NID}, ${ImagesSubTable.PATH}) 
+        SELECT ${bodyPart.ID}, unnest($7::text[]) FROM ${Parts.BODY} 
+        RETURNING ${ImagesSubTable.PATH}
+      ),
+
       ${Parts.AUTHOR} AS (
         SELECT ${author} FROM ${Parts.BODY} 
 
@@ -89,20 +92,24 @@ const news = {
         LEFT JOIN ${Tables.USERS}
           ON ${bodyPart.AUTHOR} = ${Tables.USERS}.${UsersTable.UID}
       )
+
+
       
     SELECT 
-      ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)}, 
-      json_agg(${tagsFullPart.ALL}) AS tags,
-      to_json(${authorPart.ALL}) AS author
-
-    FROM ${Parts.BODY}, ${Parts.TAGS_FULL}, ${Parts.AUTHOR}
-
-    GROUP BY ${newsRules.group}, ${authorPart.ALL};`,
+      ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)},
+      (SELECT to_json(${authorPart.ALL}) FROM ${Parts.AUTHOR}) AS ${NewsTable.AUTHOR},
+      (SELECT json_agg(${imagesPart.ALL}) FROM ${Parts.IMAGES}) AS ${NewsFields.AUX_IMAGES},
+      (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
+    FROM ${Parts.BODY};`,
 
   select: `
         WITH 
           ${Parts.BODY} AS ( 
             SELECT * FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1
+          ),
+
+          ${Parts.IMAGES} AS (
+            SELECT ${ImagesSubTable.PATH} FROM ${Tables.NEWS_IMAGES} WHERE ${ImagesSubTable.NID}=$1
           ),
 
           ${Parts.TAGS} AS (
@@ -125,13 +132,11 @@ const news = {
           )
         
         SELECT 
-          ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)}, 
-          json_agg(${tagsFullPart.ALL}) AS tags,
-          to_json(${authorPart.ALL}) AS author
-
-        FROM ${Parts.BODY}, ${Parts.TAGS_FULL}, ${Parts.AUTHOR}
-
-        GROUP BY ${newsRules.group}, ${authorPart.ALL};`,
+          ${bodyPart.ALL}, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)},
+          (SELECT to_json(${authorPart.ALL}) FROM ${Parts.AUTHOR}) AS ${NewsTable.AUTHOR},
+          (SELECT json_agg(${imagesPart.ALL}) FROM ${Parts.IMAGES}) AS ${NewsFields.AUX_IMAGES},
+          (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
+        FROM ${Parts.BODY};`,
 
   delete: `DELETE FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1;`,
 
