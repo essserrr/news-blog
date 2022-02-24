@@ -26,4 +26,6 @@ interface NewsRequest {
   auxImages: Array<string>;
 }
 
-export type { News, NewsUnderscored, NewsRequest };
+type CheckAuthor = { author: string | null };
+
+export type { News, NewsUnderscored, NewsRequest, CheckAuthor };

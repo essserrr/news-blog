@@ -2,7 +2,7 @@ import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
 import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
 import { Author } from 'src/core/authors';
-import { NewsUnderscored, NewsRequest } from 'src/core/news';
+import { NewsUnderscored, NewsRequest, CheckAuthor } from 'src/core/news';
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import {
   Id,
@@ -44,8 +44,6 @@ type UserLogin = Require<Pick<User, 'authToken'>>;
 
 type AuthorInsert = Author;
 type AuthorUpdate = UpdateRequest<Omit<Author, 'uid'>>;
-
-type CheckAuthor = Pick<NewsUnderscored, 'author'>;
 
 interface Database {
   tags: {

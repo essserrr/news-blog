@@ -1,5 +1,5 @@
 import { QueryResult } from 'pg';
-import { NewsUnderscored } from 'src/core/news';
+import { NewsUnderscored, CheckAuthor } from 'src/core/news';
 import { Database } from 'src/core/database';
 import { AppError } from 'src/core/errors';
 import { DbInstance } from '../types';
@@ -62,7 +62,7 @@ const checkAuthor =
   async (nid) => {
     logger.debug(`Checking author for news: ${nid}`);
 
-    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.checkAuthor, [nid]);
+    const res: QueryResult<CheckAuthor> = await pool.query(queries.news.checkAuthor, [nid]);
 
     const news = res.rows[0];
     if (!news) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });

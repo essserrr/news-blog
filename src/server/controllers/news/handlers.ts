@@ -1,4 +1,4 @@
-import { NewsInsertBody, NewsUpdateBody } from 'src/core/remote-client';
+import { NewsInsertBody } from 'src/core/remote-client';
 import { Handler, respondWithError } from 'src/core/server';
 import { getTypedError, AppError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
@@ -58,13 +58,12 @@ const update: Handler = (app) => async (req, res) => {
   try {
     const { uid: nid } = validateQuery({ uid: req.params.id });
 
-    const newsAuthor = await app.db.news.checkAuthor(nid);
-    if (res.locals?.auth?.uid !== newsAuthor.author) throw new AppError({ code: 'FORBIDDEN' });
+    const { author } = await app.db.news.checkAuthor(nid);
+    if (author === null || res.locals?.auth?.uid !== author)
+      throw new AppError({ code: 'FORBIDDEN' });
 
-    const { author, title, content, category, tags, mainImage, auxImages }: NewsUpdateBody =
-      req.body || {};
+    const { title, content, category, tags, mainImage, auxImages }: NewsInsertBody = req.body || {};
 
-    const { uid: authorValidated } = validateQuery({ uid: author });
     const {
       title: validatedTitle,
       content: validatedContent,
@@ -82,7 +81,7 @@ const update: Handler = (app) => async (req, res) => {
     });
 
     const data = await app.db.news.update(nid, {
-      author: authorValidated,
+      author,
       title: validatedTitle,
       content: validatedContent,
       category: validatedCategoryId,
