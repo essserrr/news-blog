@@ -57,4 +57,16 @@ const updateNews =
     return news;
   };
 
-export { addNews, getNews, updateNews };
+const checkAuthor =
+  ({ logger, pool, queries }: DbInstance): Database['news']['checkAuthor'] =>
+  async (nid) => {
+    logger.debug(`Checking author for news: ${nid}`);
+
+    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.checkAuthor, [nid]);
+
+    const news = res.rows[0];
+    if (!news) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });
+    return news;
+  };
+
+export { addNews, getNews, updateNews, checkAuthor };

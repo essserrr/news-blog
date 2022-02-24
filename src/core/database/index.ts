@@ -45,6 +45,8 @@ type UserLogin = Require<Pick<User, 'authToken'>>;
 type AuthorInsert = Author;
 type AuthorUpdate = UpdateRequest<Omit<Author, 'uid'>>;
 
+type CheckAuthor = Pick<NewsUnderscored, 'author'>;
+
 interface Database {
   tags: {
     add: (options: TagUpdate) => Promise<Tag>;
@@ -82,6 +84,7 @@ interface Database {
     add: (options: NewsRequest) => Promise<NewsUnderscored>;
     get: (nid: Uid) => Promise<NewsUnderscored>;
     update: (nid: Uid, options: NewsRequest) => Promise<NewsUnderscored>;
+    checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
   };
 }
 

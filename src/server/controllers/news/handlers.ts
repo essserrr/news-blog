@@ -56,11 +56,14 @@ const get: Handler = (app) => async (req, res) => {
 
 const update: Handler = (app) => async (req, res) => {
   try {
+    const { uid: nid } = validateQuery({ uid: req.params.id });
+
+    const newsAuthor = await app.db.news.checkAuthor(nid);
+    if (res.locals?.auth?.uid !== newsAuthor.author) throw new AppError({ code: 'FORBIDDEN' });
+
     const { author, title, content, category, tags, mainImage, auxImages }: NewsUpdateBody =
       req.body || {};
-    if (res.locals?.auth?.uid !== author) throw new AppError({ code: 'FORBIDDEN' });
 
-    const { uid: nid } = validateQuery({ uid: req.params.id });
     const { uid: authorValidated } = validateQuery({ uid: author });
     const {
       title: validatedTitle,

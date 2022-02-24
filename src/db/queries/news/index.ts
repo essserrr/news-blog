@@ -141,6 +141,10 @@ const news = {
       (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
     FROM ${Parts.BODY};`,
 
+  checkAuthor: `
+    SELECT ${NewsTable.AUTHOR} FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1;
+  `,
+
   select: `
         WITH RECURSIVE
           ${Parts.BODY} AS ( 
