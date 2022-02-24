@@ -215,7 +215,7 @@ const news = {
           ${NewsTable.CONTENT}=$4, 
           ${NewsTable.CATEGORY}=$5, 
           ${NewsTable.MAIN_IMAGE}=$6
-        WHERE (${NewsTable.ID}=$1 AND ${NewsTable.AUTHOR}=$2 ) RETURNING *;
+        WHERE (${NewsTable.ID}=$1 AND ${NewsTable.AUTHOR}=$2 ) RETURNING *
       ),
 
     test_delete AS (

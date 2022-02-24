@@ -24,6 +24,16 @@ interface NewsInsertBody {
   auxImages: Array<string>;
 }
 
+interface NewsUpdateBody {
+  author: string;
+  title: string;
+  content: string;
+  category: number;
+  tags: Array<number>;
+  mainImage: string;
+  auxImages: Array<string>;
+}
+
 export type {
   TagBody,
   CategoryInsertBody,
@@ -32,4 +42,5 @@ export type {
   AuthorInsertBody,
   AuthorUpdateBody,
   NewsInsertBody,
+  NewsUpdateBody,
 };

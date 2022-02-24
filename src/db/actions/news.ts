@@ -36,4 +36,25 @@ const getNews =
     return news;
   };
 
-export { addNews, getNews };
+const updateNews =
+  ({ logger, pool, queries }: DbInstance): Database['news']['update'] =>
+  async (nid, { tags, author, title, content, category, mainImage, auxImages }) => {
+    logger.debug(`Updating news: ${title} from ${author}`);
+
+    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.update, [
+      nid,
+      author,
+      title,
+      content,
+      category,
+      mainImage,
+      tags,
+      auxImages,
+    ]);
+
+    const news = res.rows[0];
+    if (!news) throw new AppError({ errorType: 'Database error', code: 'UNKNOWN_ERROR' });
+    return news;
+  };
+
+export { addNews, getNews, updateNews };
