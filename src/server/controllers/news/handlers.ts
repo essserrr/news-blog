@@ -96,4 +96,20 @@ const update: Handler = (app) => async (req, res) => {
   }
 };
 
-export { add, get, update };
+const remove: Handler = (app) => async (req, res) => {
+  try {
+    const { uid: nid } = validateQuery({ uid: req.params.id });
+
+    const { author } = await app.db.news.checkAuthor(nid);
+    if (author === null || res.locals?.auth?.uid !== author)
+      throw new AppError({ code: 'FORBIDDEN' });
+
+    const data = await app.db.news.remove(nid, author);
+
+    res.send({ data });
+  } catch (e) {
+    respondWithError(app, res, getTypedError(e));
+  }
+};
+
+export { add, get, update, remove };

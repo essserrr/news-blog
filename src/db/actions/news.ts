@@ -26,10 +26,10 @@ const addNews =
 
 const getNews =
   ({ logger, pool, queries }: DbInstance): Database['news']['get'] =>
-  async (uid) => {
-    logger.debug(`Getting news: ${uid}`);
+  async (nid) => {
+    logger.debug(`Getting news: ${nid}`);
 
-    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.select, [uid]);
+    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.select, [nid]);
 
     const news = res.rows[0];
     if (!news) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });
@@ -69,4 +69,15 @@ const checkAuthor =
     return news;
   };
 
-export { addNews, getNews, updateNews, checkAuthor };
+const removeNews =
+  ({ logger, pool, queries }: DbInstance): Database['news']['remove'] =>
+  async (nid, uid) => {
+    logger.debug(`Removing news: ${nid}`);
+    await pool.query(queries.news.delete, [nid, uid]);
+
+    return {
+      message: 'Ok',
+    };
+  };
+
+export { addNews, getNews, updateNews, checkAuthor, removeNews };

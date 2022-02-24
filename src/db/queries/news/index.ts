@@ -209,7 +209,7 @@ const news = {
           (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
         FROM ${Parts.BODY};`,
 
-  delete: `DELETE FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1;`,
+  delete: `DELETE FROM ${Tables.NEWS} WHERE (${NewsTable.ID}=$1 AND ${NewsTable.AUTHOR}=$2);`,
 
   update: `
   WITH RECURSIVE
