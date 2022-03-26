@@ -58,6 +58,85 @@ const categoriesPart = {
   LEVEL: `${Parts.CATEGORIES}.${Recursive.LEVEL}`,
 } as const;
 
+const equal = (what: string, to: number | string) => `${what} = '${to}'`;
+
+interface TagFilter {
+  type: 'tag';
+  filter: 'in' | 'all';
+  tags: Array<number>;
+}
+
+enum SelectAllParts {
+  FILTERED = 'all_filtered',
+}
+
+const selectAllByTag = ({ filter, tags }: TagFilter) => {
+  const LOCAL_TABLE = 'a';
+
+  const minCount = filter === 'all' ? tags.length : 1;
+
+  const whereCondition = tags.map((v) => equal(TagsSubTable.ID, v));
+
+  return `
+  SELECT ${LOCAL_TABLE}.${TagsSubTable.NID} as ${NewsTable.ID} FROM
+    (SELECT 
+      ${TagsSubTable.NID}, count(${TagsSubTable.ID})
+    FROM ${Tables.NEWS_TAGS}
+    WHERE ${whereCondition.join(' OR ')}
+    GROUP BY ${TagsSubTable.NID}) ${LOCAL_TABLE}
+  WHERE ${LOCAL_TABLE}.count >= '${minCount}'`;
+};
+
+type Filters = TagFilter;
+
+const filters = (f: Filters) => {
+  switch (f.type) {
+    case 'tag':
+      return selectAllByTag(f);
+    default:
+      return '';
+  }
+};
+
+function selectAll(f: Filters) {
+  const filterQuery = filters(f);
+
+  return `
+
+  WITH RECURSIVE
+    ${SelectAllParts.FILTERED} AS (${filterQuery}),
+
+    ${Parts.IMAGES} AS (
+      SELECT 
+        ${SelectAllParts.FILTERED}.${NewsTable.ID},
+        NULLIF(array_agg(${ImagesSubTable.PATH}), '{NULL}') as ${NewsFields.AUX_IMAGES}  
+        
+      FROM ${SelectAllParts.FILTERED}
+
+      LEFT JOIN ${Tables.NEWS_IMAGES}
+        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS_IMAGES}.${ImagesSubTable.NID}
+      
+      GROUP BY ${SelectAllParts.FILTERED}.${NewsTable.ID}
+    ),
+
+    ${Parts.BODY} AS (
+      SELECT * FROM ${SelectAllParts.FILTERED}
+
+      LEFT JOIN ${Tables.NEWS}
+        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS}.${NewsTable.ID}
+      LEFT JOIN ${Parts.IMAGES}
+        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Parts.IMAGES}.${NewsTable.ID}
+    )
+
+
+
+  SELECT 
+    (SELECT COUNT(*) FROM ${SelectAllParts.FILTERED}) as count,
+    (
+      SELECT json_agg(${Parts.BODY}.*) FROM ${Parts.BODY}
+    ) AS rows;`;
+}
+
 const news = {
   createNewsTable: `
     ${newsBody.createNewsTable}
@@ -294,14 +373,7 @@ const news = {
     (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
   FROM ${Parts.BODY};`,
 
-  selectAll: `
-                    SELECT
-                      (SELECT COUNT(*) FROM ${Tables.NEWS}) as count, 
-                      (SELECT json_agg(t.*) 
-                        FROM (
-                          SELECT * FROM ${Tables.NEWS} ORDER BY ${NewsTable.ID} ASC LIMIT $1 OFFSET $2
-                        ) AS t
-                      ) AS rows;`,
+  selectAll,
 } as const;
 
 export { NewsTable, news };

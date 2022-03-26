@@ -40,14 +40,18 @@ const getAllNews =
   ({ logger, pool, queries }: DbInstance): Database['news']['getAll'] =>
   async (offset, limit) => {
     logger.debug(`Getting tag list ${limit} ${offset}`);
-    const res: QueryResult<DbPage<NewsUnderscored>> = await pool.query(queries.news.selectAll, [
-      limit,
-      offset,
-    ]);
+    const res: QueryResult<DbPage<NewsUnderscored>> = await pool.query(
+      queries.news.selectAll({ filter: 'all', tags: [1], type: 'tag' }),
+      [],
+    );
 
     const { count = 0, rows } = res.rows[0] || {};
 
-    return { count, data: rows || [], next: limit === null ? false : limit + offset < count };
+    return {
+      count,
+      data: (res.rows as []) || [],
+      next: limit === null ? false : limit + offset < count,
+    };
   };
 
 const updateNews =
