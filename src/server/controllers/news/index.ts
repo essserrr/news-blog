@@ -2,7 +2,7 @@ import express from 'express';
 import { App } from 'src/core/app';
 import { authMiddleware, ProtectedMethods } from 'src/server/middleware/auth';
 
-import { add, get, update, remove } from './handlers';
+import { add, get, update, remove, getAll } from './handlers';
 
 const protectedMethods: ProtectedMethods = {
   POST: true,
@@ -12,6 +12,8 @@ const protectedMethods: ProtectedMethods = {
 
 const initNewsRouter = (app: App) => {
   const router = express.Router();
+
+  router.route('/').get(getAll(app));
 
   router
     .use('/:id', authMiddleware(app, protectedMethods))

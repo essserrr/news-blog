@@ -1,6 +1,6 @@
 import { QueryResult } from 'pg';
 import { NewsUnderscored, CheckAuthor } from 'src/core/news';
-import { Database } from 'src/core/database';
+import { Database, DbPage } from 'src/core/database';
 import { AppError } from 'src/core/errors';
 import { DbInstance } from '../types';
 
@@ -34,6 +34,20 @@ const getNews =
     const news = res.rows[0];
     if (!news) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });
     return news;
+  };
+
+const getAllNews =
+  ({ logger, pool, queries }: DbInstance): Database['news']['getAll'] =>
+  async (offset, limit) => {
+    logger.debug(`Getting tag list ${limit} ${offset}`);
+    const res: QueryResult<DbPage<NewsUnderscored>> = await pool.query(queries.news.selectAll, [
+      limit,
+      offset,
+    ]);
+
+    const { count = 0, rows } = res.rows[0] || {};
+
+    return { count, data: rows || [], next: limit === null ? false : limit + offset < count };
   };
 
 const updateNews =
@@ -80,4 +94,4 @@ const removeNews =
     };
   };
 
-export { addNews, getNews, updateNews, checkAuthor, removeNews };
+export { addNews, getNews, updateNews, checkAuthor, removeNews, getAllNews };

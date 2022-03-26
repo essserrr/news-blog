@@ -44,7 +44,7 @@ const authors = {
                     SELECT * FROM ${CURRENT_TABLE}
                     ORDER BY ${AuthorsTable.UID} ASC 
                     LIMIT $1 
-                     OFFSET $2
+                    OFFSET $2
                   ) AS t
                 ) AS rows;`,
 } as const;

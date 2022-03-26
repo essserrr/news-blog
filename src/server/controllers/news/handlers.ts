@@ -112,4 +112,16 @@ const remove: Handler = (app) => async (req, res) => {
   }
 };
 
-export { add, get, update, remove };
+const getAll: Handler = (app) => async (req, res) => {
+  try {
+    const { offset = 0, limit = null } = req.query;
+    const { offset: validatedOffset, limit: validatedLimit } = validateQuery({ offset, limit });
+    const data = await app.db.news.getAll(validatedOffset, validatedLimit);
+
+    res.send({ data });
+  } catch (e) {
+    respondWithError(app, res, getTypedError(e));
+  }
+};
+
+export { add, get, update, remove, getAll };

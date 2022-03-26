@@ -81,6 +81,7 @@ interface Database {
   news: {
     add: (options: NewsRequest) => Promise<NewsUnderscored>;
     get: (nid: Uid) => Promise<NewsUnderscored>;
+    getAll: (offset: Offset, limit: Limit) => Promise<PaginatedResult<NewsUnderscored>>;
     update: (nid: Uid, options: NewsRequest) => Promise<NewsUnderscored>;
     checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
     remove: (nid: Uid, uid: Uid) => Promise<MessageResponse>;
