@@ -12,53 +12,103 @@ import { authorObject } from './news-author';
 import { categoryObject } from './news-category';
 import { Parts, NewsFields, Recursive } from './constants';
 
+enum SelectAllParts {
+  PRE_FILTERED = 'all_pre_filtered',
+  FILTERED = 'all_filtered',
+  RESULT = 'all_result',
+}
+
 const equal = (what: string, to: number | string) => `${what} = '${to}'`;
 
 interface TagFilter {
   type: 'tag';
   filter: 'in' | 'all';
-  tags: Array<number>;
+  value: Array<number>;
 }
 
-const selectAllByTag = ({ filter, tags }: TagFilter) => {
+const selectAllByTag = ({ filter, value }: TagFilter) => {
   const LOCAL_TABLE = 'a';
 
-  const minCount = filter === 'all' ? tags.length : 1;
+  const minCount = filter === 'all' ? value.length : 1;
 
-  const whereCondition = tags.map((v) => equal(TagsSubTable.ID, v));
+  const whereCondition = value.map((v) => equal(TagsSubTable.ID, v));
 
   return `
-  SELECT ${LOCAL_TABLE}.${TagsSubTable.NID} as ${NewsTable.ID} FROM
-    (SELECT 
-      ${TagsSubTable.NID}, count(${TagsSubTable.ID})
-    FROM ${Tables.NEWS_TAGS}
-    WHERE ${whereCondition.join(' OR ')}
-    GROUP BY ${TagsSubTable.NID}) ${LOCAL_TABLE}
-  WHERE ${LOCAL_TABLE}.count >= '${minCount}'`;
+  ${SelectAllParts.FILTERED} AS (
+
+    SELECT ${LOCAL_TABLE}.${TagsSubTable.NID} as ${NewsTable.ID} FROM
+      (SELECT 
+        ${TagsSubTable.NID}, count(${TagsSubTable.ID})
+      FROM ${Tables.NEWS_TAGS}
+      WHERE ${whereCondition.join(' OR ')}
+       GROUP BY ${TagsSubTable.NID}
+      ) AS ${LOCAL_TABLE}
+
+    WHERE ${LOCAL_TABLE}.count >= '${minCount}'
+  )
+  `;
 };
 
-type Filters = TagFilter;
+interface CategoryFilter {
+  type: 'category';
+  value: number;
+}
+
+const selectAllByCategory = ({ value }: CategoryFilter) =>
+  `
+  ${SelectAllParts.PRE_FILTERED} AS (
+    SELECT 
+      ${Tables.CATEGORIES}.${CategoriesTable.ID}, 
+      ${Tables.CATEGORIES}.${CategoriesTable.PID}
+    FROM ${Tables.CATEGORIES} 
+    WHERE ${Tables.CATEGORIES}.${CategoriesTable.ID} = '${value}'
+
+    UNION ALL
+
+    SELECT 
+      ${Tables.CATEGORIES}.${CategoriesTable.ID}, 
+      ${Tables.CATEGORIES}.${CategoriesTable.PID}
+    FROM ${Tables.CATEGORIES}
+    JOIN ${SelectAllParts.PRE_FILTERED} 
+      ON 
+        ${Tables.CATEGORIES}.${CategoriesTable.PID} 
+        = 
+        ${SelectAllParts.PRE_FILTERED}.${CategoriesTable.ID}
+  ),
+
+  ${SelectAllParts.FILTERED} AS (
+    SELECT 
+      ${Tables.NEWS}.${NewsTable.ID}
+    FROM ${SelectAllParts.PRE_FILTERED}
+
+
+    LEFT JOIN ${Tables.NEWS}
+      ON ${SelectAllParts.PRE_FILTERED}.${CategoriesTable.ID} = ${Tables.NEWS}.${NewsTable.CATEGORY}
+
+    WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
+  )
+  `;
+
+type Filters = TagFilter | CategoryFilter;
 
 const filters = (f: Filters) => {
   switch (f.type) {
     case 'tag':
       return selectAllByTag(f);
+    case 'category':
+      return selectAllByCategory(f);
     default:
       return '';
   }
 };
 
-enum SelectAllParts {
-  FILTERED = 'all_filtered',
-  RESULT = 'all_result',
-}
 
 function selectAll(f: Filters) {
   const filterQuery = filters(f);
 
   return `
   WITH RECURSIVE
-    ${SelectAllParts.FILTERED} AS (${filterQuery}),
+    ${filterQuery},
 
     ${Parts.BODY} AS (
       SELECT ${Tables.NEWS}.* FROM ${SelectAllParts.FILTERED}
