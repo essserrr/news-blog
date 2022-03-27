@@ -8,7 +8,7 @@ import { CategoriesTable } from '../categories';
 import { newsTags, TagsSubTable } from './news-tags';
 import { newsBody, NewsTable } from './news-body';
 import { newsImages, ImagesSubTable } from './news-images';
-import { author } from './news-author';
+import { author, authorObject } from './news-author';
 
 enum NewsFields {
   TAGS = 'tags',
@@ -68,6 +68,7 @@ interface TagFilter {
 
 enum SelectAllParts {
   FILTERED = 'all_filtered',
+  RESULT = 'all_result',
 }
 
 const selectAllByTag = ({ filter, tags }: TagFilter) => {
@@ -106,11 +107,17 @@ function selectAll(f: Filters) {
   WITH RECURSIVE
     ${SelectAllParts.FILTERED} AS (${filterQuery}),
 
+    ${Parts.BODY} AS (
+      SELECT ${Tables.NEWS}.* FROM ${SelectAllParts.FILTERED}
+
+      LEFT JOIN ${Tables.NEWS}
+        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS}.${NewsTable.ID}
+    ),
+
     ${Parts.IMAGES} AS (
       SELECT 
         ${SelectAllParts.FILTERED}.${NewsTable.ID},
         NULLIF(array_agg(${ImagesSubTable.PATH}), '{NULL}') as ${NewsFields.AUX_IMAGES}  
-        
       FROM ${SelectAllParts.FILTERED}
 
       LEFT JOIN ${Tables.NEWS_IMAGES}
@@ -119,21 +126,33 @@ function selectAll(f: Filters) {
       GROUP BY ${SelectAllParts.FILTERED}.${NewsTable.ID}
     ),
 
-    ${Parts.BODY} AS (
-      SELECT * FROM ${SelectAllParts.FILTERED}
+    ${Parts.AUTHOR} AS (
+      SELECT
+        ${Parts.BODY}.${NewsTable.ID},
+        jsonb_build_object(${authorObject}) AS ${NewsTable.AUTHOR}
+      FROM ${Parts.BODY} 
 
-      LEFT JOIN ${Tables.NEWS}
-        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS}.${NewsTable.ID}
+      LEFT JOIN ${Tables.AUTHORS}
+        ON ${Parts.BODY}.${NewsTable.AUTHOR} = ${Tables.AUTHORS}.${AuthorsTable.UID}
+      LEFT JOIN ${Tables.USERS}
+        ON ${Parts.BODY}.${NewsTable.AUTHOR} = ${Tables.USERS}.${UsersTable.UID} 
+    ),
+
+    ${SelectAllParts.RESULT} AS (
+      SELECT * FROM ${Parts.BODY}
+
       LEFT JOIN ${Parts.IMAGES}
-        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Parts.IMAGES}.${NewsTable.ID}
+        ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.IMAGES}.${NewsTable.ID}
+      LEFT JOIN ${Parts.AUTHOR}
+        ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.AUTHOR}.${NewsTable.ID}
     )
 
 
 
   SELECT 
-    (SELECT COUNT(*) FROM ${SelectAllParts.FILTERED}) as count,
+    (SELECT COUNT(*) FROM ${SelectAllParts.RESULT}) as count,
     (
-      SELECT json_agg(${Parts.BODY}.*) FROM ${Parts.BODY}
+      SELECT json_agg(${SelectAllParts.RESULT}.*) FROM ${SelectAllParts.RESULT}
     ) AS rows;`;
 }
 

@@ -14,4 +14,19 @@ const author = `
   ${timestampToInteger(`${Tables.USERS}.${UsersTable.CREATED_AT}`, UsersTable.CREATED_AT)}
 ` as const;
 
-export { author };
+const authorObject = `
+  '${AuthorsTable.UID}', ${Tables.USERS}.${AuthorsTable.UID}, 
+  '${AuthorsTable.DESCRIPTION}', ${Tables.AUTHORS}.${AuthorsTable.DESCRIPTION},
+  '${UsersTable.USERNAME}', ${Tables.USERS}.${UsersTable.USERNAME},
+  '${UsersTable.SECOND_NAME}', ${Tables.USERS}.${UsersTable.SECOND_NAME},
+  '${UsersTable.NAME}', ${Tables.USERS}.${UsersTable.NAME},
+  '${UsersTable.AVATAR}', ${Tables.USERS}.${UsersTable.AVATAR},
+  '${UsersTable.IS_ADMIN}', ${Tables.USERS}.${UsersTable.IS_ADMIN},
+  '${UsersTable.CREATED_AT}', ${timestampToInteger(
+  `${Tables.USERS}.${UsersTable.CREATED_AT}`,
+  undefined,
+  'none',
+)}
+` as const;
+
+export { author, authorObject };
