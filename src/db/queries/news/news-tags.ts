@@ -28,4 +28,9 @@ const newsTags = {
 `,
 } as const;
 
-export { TagsSubTable, TagRules, newsTags };
+const tagsObject = `
+  '${TagsTable.ID}', ${Tables.TAGS}.${TagsTable.ID}, 
+  '${TagsTable.NAME}', ${Tables.TAGS}.${TagsTable.NAME}
+` as const;
+
+export { TagsSubTable, TagRules, newsTags, tagsObject };

@@ -5,7 +5,7 @@ import { TagsTable } from '../tags';
 import { UsersTable } from '../users';
 import { CategoriesTable } from '../categories';
 
-import { newsTags, TagsSubTable } from './news-tags';
+import { newsTags, TagsSubTable, tagsObject } from './news-tags';
 import { newsBody, NewsTable } from './news-body';
 import { newsImages, ImagesSubTable } from './news-images';
 import { author, authorObject } from './news-author';
@@ -138,13 +138,33 @@ function selectAll(f: Filters) {
         ON ${Parts.BODY}.${NewsTable.AUTHOR} = ${Tables.USERS}.${UsersTable.UID} 
     ),
 
+    
+    ${Parts.TAGS} AS (
+      SELECT
+        ${Tables.NEWS_TAGS}.${TagsSubTable.NID} AS ${NewsTable.ID},
+        NULLIF(array_agg(jsonb_build_object(${tagsObject})), '{NULL}') AS ${NewsFields.TAGS}
+      FROM ${SelectAllParts.FILTERED}
+
+      LEFT JOIN ${Tables.NEWS_TAGS}
+        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
+      LEFT JOIN ${Tables.TAGS}
+        ON ${Tables.TAGS}.${TagsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.ID}
+
+      GROUP BY ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
+
+    ),
+
     ${SelectAllParts.RESULT} AS (
-      SELECT * FROM ${Parts.BODY}
+      SELECT 
+        *, ${timestampToInteger(`${bodyPart.CREATED_AT}`, NewsTable.CREATED_AT)} 
+      FROM ${Parts.BODY}
 
       LEFT JOIN ${Parts.IMAGES}
         ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.IMAGES}.${NewsTable.ID}
       LEFT JOIN ${Parts.AUTHOR}
         ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.AUTHOR}.${NewsTable.ID}
+      LEFT JOIN ${Parts.TAGS}
+        ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.TAGS}.${NewsTable.ID}
     )
 
 
