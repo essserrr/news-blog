@@ -5,6 +5,7 @@ enum Parts {
   TAGS_FULL = 'news_tags_list_full',
   IMAGES = 'news_aux_images_list',
   CATEGORIES = 'news_categories_list',
+  CATEGORIES_FULL = 'news_categories_list_full',
 }
 
 enum NewsFields {
@@ -12,4 +13,8 @@ enum NewsFields {
   AUX_IMAGES = 'aux_images',
 }
 
-export { Parts, NewsFields };
+enum Recursive {
+  LEVEL = 'level',
+}
+
+export { Parts, NewsFields, Recursive };

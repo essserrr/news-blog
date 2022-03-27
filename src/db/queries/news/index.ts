@@ -9,7 +9,7 @@ import { newsTags, TagsSubTable } from './news-tags';
 import { newsBody, NewsTable } from './news-body';
 import { newsImages, ImagesSubTable } from './news-images';
 import { author } from './news-author';
-import { Parts, NewsFields } from './constants';
+import { Parts, NewsFields, Recursive } from './constants';
 import { selectAll } from './select-all';
 
 const bodyPart = {
@@ -36,10 +36,6 @@ const tagsFullPart = {
 const imagesPart = {
   ALL: `${Parts.IMAGES}.*`,
 } as const;
-
-enum Recursive {
-  LEVEL = 'level',
-}
 
 const categoriesPart = {
   ALL: `${Parts.CATEGORIES}.*`,

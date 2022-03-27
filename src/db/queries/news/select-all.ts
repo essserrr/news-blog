@@ -9,7 +9,8 @@ import { TagsSubTable, tagsObject } from './news-tags';
 import { NewsTable } from './news-body';
 import { ImagesSubTable } from './news-images';
 import { authorObject } from './news-author';
-import { Parts, NewsFields } from './constants';
+import { categoryObject } from './news-category';
+import { Parts, NewsFields, Recursive } from './constants';
 
 const equal = (what: string, to: number | string) => `${what} = '${to}'`;
 
@@ -56,7 +57,6 @@ function selectAll(f: Filters) {
   const filterQuery = filters(f);
 
   return `
-
   WITH RECURSIVE
     ${SelectAllParts.FILTERED} AS (${filterQuery}),
 
@@ -104,7 +104,44 @@ function selectAll(f: Filters) {
         ON ${Tables.TAGS}.${TagsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.ID}
 
       GROUP BY ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
+    ),
 
+    ${Parts.CATEGORIES} AS (
+      SELECT 
+        ${Parts.BODY}.${NewsTable.ID} AS ${TagsSubTable.NID},
+        ${Tables.CATEGORIES}.${CategoriesTable.ID},
+        ${Tables.CATEGORIES}.${CategoriesTable.PID},
+        ${Tables.CATEGORIES}.${CategoriesTable.NAME},
+        1 AS ${Recursive.LEVEL}
+      FROM ${Parts.BODY} 
+      LEFT JOIN ${Tables.CATEGORIES}
+        ON ${Parts.BODY}.${NewsTable.CATEGORY} = ${Tables.CATEGORIES}.${CategoriesTable.ID}
+      
+      UNION ALL
+    
+      SELECT 
+        ${Parts.CATEGORIES}.${TagsSubTable.NID},
+        ${Tables.CATEGORIES}.${CategoriesTable.ID}, 
+        ${Tables.CATEGORIES}.${CategoriesTable.PID}, 
+        ${Tables.CATEGORIES}.${CategoriesTable.NAME}, 
+        ${Parts.CATEGORIES}.${Recursive.LEVEL} + 1 AS ${Recursive.LEVEL}
+      FROM ${Tables.CATEGORIES}
+      JOIN ${Parts.CATEGORIES} 
+      ON 
+        ${Tables.CATEGORIES}.${CategoriesTable.ID} 
+        = 
+        ${Parts.CATEGORIES}.${CategoriesTable.PID}
+
+    ),
+
+    ${Parts.CATEGORIES_FULL} AS (
+        SELECT 
+          ${Parts.CATEGORIES}.${TagsSubTable.NID} AS ${NewsTable.ID},
+          NULLIF(array_agg(jsonb_build_object(${categoryObject})), '{NULL}') AS ${
+    NewsTable.CATEGORY
+  }
+        FROM ${Parts.CATEGORIES} 
+        GROUP BY ${Parts.CATEGORIES}.${TagsSubTable.NID}
     ),
 
     ${SelectAllParts.RESULT} AS (
@@ -118,6 +155,8 @@ function selectAll(f: Filters) {
         ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.AUTHOR}.${NewsTable.ID}
       LEFT JOIN ${Parts.TAGS}
         ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.TAGS}.${NewsTable.ID}
+      LEFT JOIN ${Parts.CATEGORIES_FULL}
+        ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.CATEGORIES_FULL}.${NewsTable.ID}
     )
 
 
