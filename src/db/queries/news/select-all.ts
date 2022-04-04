@@ -54,8 +54,7 @@ interface CategoryFilter {
   value: number;
 }
 
-const selectAllByCategory = ({ value }: CategoryFilter) =>
-  `
+const selectAllByCategory = ({ value }: CategoryFilter) => `
   ${SelectAllParts.PRE_FILTERED} AS (
     SELECT 
       ${Tables.CATEGORIES}.${CategoriesTable.ID}, 
@@ -87,7 +86,7 @@ const selectAllByCategory = ({ value }: CategoryFilter) =>
 
     WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
   )
-  `;
+`;
 
 interface AuthorNameFilter {
   type: 'authorName';
@@ -95,7 +94,7 @@ interface AuthorNameFilter {
 }
 
 const selectAllByAuthorName = ({ name }: AuthorNameFilter) => `
-    ${SelectAllParts.PRE_FILTERED} AS (
+  ${SelectAllParts.PRE_FILTERED} AS (
       SELECT 
         ${Tables.USERS}.${UsersTable.UID}
       FROM  ${Tables.AUTHORS}
@@ -117,10 +116,40 @@ const selectAllByAuthorName = ({ name }: AuthorNameFilter) => `
       LEFT JOIN ${Tables.NEWS}
         ON ${SelectAllParts.PRE_FILTERED}.${UsersTable.UID} = ${Tables.NEWS}.${NewsTable.AUTHOR}
       WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
-    )
-    `;
+  )
+`;
 
-type Filters = TagFilter | CategoryFilter | AuthorNameFilter;
+interface TitleFilter {
+  type: 'title';
+  title: string;
+}
+
+const selectAllByTitle = ({ title }: TitleFilter) => `
+  ${SelectAllParts.FILTERED} AS (
+    SELECT 
+      ${Tables.NEWS}.${NewsTable.ID}
+    FROM ${Tables.NEWS}
+
+    WHERE lower(${NewsTable.TITLE}) LIKE('%${title}%')
+  )
+`;
+
+interface ContentFilter {
+  type: 'content';
+  content: string;
+}
+
+const selectAllByContent = ({ content }: ContentFilter) => `
+  ${SelectAllParts.FILTERED} AS (
+    SELECT 
+      ${Tables.NEWS}.${NewsTable.ID}
+    FROM ${Tables.NEWS}
+
+    WHERE lower(${NewsTable.CONTENT}) LIKE('%${content}%')
+  )
+`;
+
+type Filters = TagFilter | CategoryFilter | AuthorNameFilter | TitleFilter | ContentFilter;
 
 const filters = (f: Filters) => {
   switch (f.type) {
@@ -130,6 +159,10 @@ const filters = (f: Filters) => {
       return selectAllByCategory(f);
     case 'authorName':
       return selectAllByAuthorName(f);
+    case 'title':
+      return selectAllByTitle(f);
+    case 'content':
+      return selectAllByContent(f);
     default:
       return '';
   }
