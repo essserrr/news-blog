@@ -38,10 +38,10 @@ const getNews =
 
 const getAllNews =
   ({ logger, pool, queries }: DbInstance): Database['news']['getAll'] =>
-  async (offset, limit) => {
+  async ({ offset, limit, filter }) => {
     logger.debug(`Getting tag list ${limit} ${offset}`);
     const res: QueryResult<DbPage<NewsUnderscored>> = await pool.query(
-      queries.news.selectAll({ name: '1', type: 'authorName' }),
+      queries.news.selectAll(filter),
       [],
     );
 

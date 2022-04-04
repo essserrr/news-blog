@@ -1,3 +1,14 @@
+import {
+  TagFilter,
+  CategoryFilter,
+  AuthorNameFilter,
+  TitleFilter,
+  ContentFilter,
+  CreatedAtFilter,
+  SearchFilter,
+  Filters,
+} from 'src/core/database/filters';
+
 import { Tables } from '../tables';
 import { timestampToInteger } from '../converters';
 import { AuthorsTable } from '../authors';
@@ -16,12 +27,6 @@ enum SelectAllParts {
   PRE_FILTERED = 'all_pre_filtered',
   FILTERED = 'all_filtered',
   RESULT = 'all_result',
-}
-
-interface TagFilter {
-  type: 'tag';
-  filter: 'in' | 'all';
-  value: Array<number>;
 }
 
 const selectAllByTag = ({ filter, value }: TagFilter) => {
@@ -46,11 +51,6 @@ const selectAllByTag = ({ filter, value }: TagFilter) => {
   )
   `;
 };
-
-interface CategoryFilter {
-  type: 'category';
-  value: number;
-}
 
 const selectAllByCategory = ({ value }: CategoryFilter) => `
   ${SelectAllParts.PRE_FILTERED} AS (
@@ -86,12 +86,7 @@ const selectAllByCategory = ({ value }: CategoryFilter) => `
   )
 `;
 
-interface AuthorNameFilter {
-  type: 'authorName';
-  name: string;
-}
-
-const selectAllByAuthorName = ({ name }: AuthorNameFilter) => `
+const selectAllByAuthorName = ({ value }: AuthorNameFilter) => `
   ${SelectAllParts.PRE_FILTERED} AS (
       SELECT 
         ${Tables.USERS}.${UsersTable.UID}
@@ -101,11 +96,11 @@ const selectAllByAuthorName = ({ name }: AuthorNameFilter) => `
       LEFT JOIN ${Tables.USERS}
         ON ${Tables.AUTHORS}.${AuthorsTable.UID} = ${Tables.USERS}.${UsersTable.UID}
 
-      WHERE lower(${UsersTable.NAME} || ' ' || ${UsersTable.SECOND_NAME}) LIKE('%${name}%')
-    ),
+      WHERE lower(${UsersTable.NAME} || ' ' || ${UsersTable.SECOND_NAME}) LIKE('%${value}%')
+  ),
 
 
-    ${SelectAllParts.FILTERED} AS (
+  ${SelectAllParts.FILTERED} AS (
       SELECT 
         ${Tables.NEWS}.${NewsTable.ID}
       FROM ${SelectAllParts.PRE_FILTERED}
@@ -117,41 +112,25 @@ const selectAllByAuthorName = ({ name }: AuthorNameFilter) => `
   )
 `;
 
-interface TitleFilter {
-  type: 'title';
-  title: string;
-}
-
-const selectAllByTitle = ({ title }: TitleFilter) => `
+const selectAllByTitle = ({ value }: TitleFilter) => `
   ${SelectAllParts.FILTERED} AS (
     SELECT 
       ${Tables.NEWS}.${NewsTable.ID}
     FROM ${Tables.NEWS}
 
-    WHERE lower(${NewsTable.TITLE}) LIKE('%${title}%')
+    WHERE lower(${NewsTable.TITLE}) LIKE('%${value}%')
   )
 `;
 
-interface ContentFilter {
-  type: 'content';
-  content: string;
-}
-
-const selectAllByContent = ({ content }: ContentFilter) => `
+const selectAllByContent = ({ value }: ContentFilter) => `
   ${SelectAllParts.FILTERED} AS (
     SELECT 
       ${Tables.NEWS}.${NewsTable.ID}
     FROM ${Tables.NEWS}
 
-    WHERE lower(${NewsTable.CONTENT}) LIKE('%${content}%')
+    WHERE lower(${NewsTable.CONTENT}) LIKE('%${value}%')
   )
 `;
-
-interface CreatedAtFilter {
-  type: 'createdAt';
-  filter: 'at' | 'gt' | 'lt';
-  value: string;
-}
 
 const SIGNS: Record<CreatedAtFilter['filter'], string> = {
   at: '=',
@@ -167,13 +146,84 @@ const selectAllByCreatedAt = ({ filter, value }: CreatedAtFilter) => `
   )
 `;
 
-type Filters =
-  | TagFilter
-  | CategoryFilter
-  | AuthorNameFilter
-  | TitleFilter
-  | ContentFilter
-  | CreatedAtFilter;
+const selectAllBySearch = ({ value }: SearchFilter) => {
+  const authorsLike = 'authors_l';
+  const authorNews = 'authors_n';
+
+  const contentNews = 'content_n';
+
+  const tagsNews = 'tag_n';
+
+  const categoriesLike = 'categories_l';
+
+  return `
+  ${authorsLike} AS (
+    SELECT 
+      ${Tables.USERS}.${UsersTable.UID}
+    FROM  ${Tables.AUTHORS}
+
+
+    LEFT JOIN ${Tables.USERS}
+      ON ${Tables.AUTHORS}.${AuthorsTable.UID} = ${Tables.USERS}.${UsersTable.UID}
+
+    WHERE lower(${UsersTable.NAME} || ' ' || ${UsersTable.SECOND_NAME}) LIKE('%${value}%')
+  ),
+
+
+  ${authorNews} AS (
+    SELECT 
+      ${Tables.NEWS}.${NewsTable.ID}
+    FROM ${authorsLike}
+
+
+    LEFT JOIN ${Tables.NEWS}
+      ON ${authorsLike}.${UsersTable.UID} = ${Tables.NEWS}.${NewsTable.AUTHOR}
+    WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
+  ),
+
+  ${contentNews} AS (
+    SELECT 
+      ${Tables.NEWS}.${NewsTable.ID}
+    FROM ${Tables.NEWS}
+
+    WHERE lower(${NewsTable.CONTENT}) LIKE('%${value}%')
+  ),
+
+  ${tagsNews} AS (
+    SELECT 
+      ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
+    FROM ${Tables.TAGS}
+
+
+    RIGHT JOIN ${Tables.NEWS_TAGS}
+      ON ${Tables.NEWS_TAGS}.${TagsSubTable.ID} = ${Tables.TAGS}.${TagsTable.ID}
+
+    WHERE lower(${Tables.TAGS}.${TagsTable.NAME}) LIKE('%${value}%')
+  ),
+
+  ${categoriesLike} AS (
+    SELECT 
+      ${Tables.NEWS}.${NewsTable.ID}
+    FROM ${Tables.CATEGORIES}
+
+
+    RIGHT JOIN ${Tables.NEWS}
+      ON ${Tables.NEWS}.${NewsTable.CATEGORY} = ${Tables.CATEGORIES}.${CategoriesTable.ID}
+
+    WHERE lower(${Tables.CATEGORIES}.${CategoriesTable.NAME}) LIKE('%${value}%')
+  ),
+
+  ${SelectAllParts.FILTERED} AS (
+    SELECT * FROM ${categoriesLike}
+      UNION
+    SELECT * FROM ${authorNews}
+      UNION
+    SELECT * FROM ${contentNews}
+      UNION
+    SELECT * FROM ${tagsNews}
+  )
+  `;
+};
 
 const filters = (f: Filters) => {
   switch (f.type) {
@@ -189,11 +239,12 @@ const filters = (f: Filters) => {
       return selectAllByContent(f);
     case 'createdAt':
       return selectAllByCreatedAt(f);
+    case 'search':
+      return selectAllBySearch(f);
     default:
       return '';
   }
 };
-
 
 function selectAll(f: Filters) {
   const filterQuery = filters(f);

@@ -2,6 +2,7 @@ import { NewsInsertBody } from 'src/core/remote-client';
 import { Handler, respondWithError } from 'src/core/server';
 import { getTypedError, AppError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
+import { filter } from 'src/core/filter';
 
 const add: Handler = (app) => async (req, res) => {
   try {
@@ -44,9 +45,9 @@ const add: Handler = (app) => async (req, res) => {
 
 const get: Handler = (app) => async (req, res) => {
   try {
-    const { uid } = validateQuery({ uid: req.params.id });
+    const { uid: nid } = validateQuery({ uid: req.params.id });
 
-    const data = await app.db.news.get(uid);
+    const data = await app.db.news.get(nid);
 
     res.send({ data });
   } catch (e) {
@@ -114,9 +115,18 @@ const remove: Handler = (app) => async (req, res) => {
 
 const getAll: Handler = (app) => async (req, res) => {
   try {
-    const { offset = 0, limit = null } = req.query;
+    const { offset = 0, limit = null, ...rest } = req.query;
+    const filterApplied = filter(rest);
+
+    console.log(filterApplied);
+
     const { offset: validatedOffset, limit: validatedLimit } = validateQuery({ offset, limit });
-    const data = await app.db.news.getAll(validatedOffset, validatedLimit);
+
+    const data = await app.db.news.getAll({
+      offset: validatedOffset,
+      limit: validatedLimit,
+      filter: filterApplied,
+    });
 
     res.send({ data });
   } catch (e) {

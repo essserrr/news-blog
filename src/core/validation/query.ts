@@ -40,12 +40,28 @@ const validateUsername = (name: unknown): Username => {
   return name;
 };
 
+const validateString = (str: unknown): string => {
+  if (!str || typeof str !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return str;
+};
+
+const validateDate = (str: unknown): string => {
+  if (!str || typeof str !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  if (!/\d{4,4}-\d{2,2}-\d{2,2}/.test(str))
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return str;
+};
+
 const validators = {
   limit: validateLimit,
   offset: validateOffset,
   id: validateId,
   uid: validateUid,
   username: validateUsername,
+  string: validateString,
+  date: validateDate,
 } as const;
 
 interface QueryRes {
@@ -54,6 +70,8 @@ interface QueryRes {
   limit: Limit;
   uid: Uid;
   username: Username;
+  string: string;
+  date: string;
 }
 
 type QueryParams = NotValidated<QueryRes>;
