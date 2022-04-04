@@ -89,7 +89,38 @@ const selectAllByCategory = ({ value }: CategoryFilter) =>
   )
   `;
 
-type Filters = TagFilter | CategoryFilter;
+interface AuthorNameFilter {
+  type: 'authorName';
+  name: string;
+}
+
+const selectAllByAuthorName = ({ name }: AuthorNameFilter) => `
+    ${SelectAllParts.PRE_FILTERED} AS (
+      SELECT 
+        ${Tables.USERS}.${UsersTable.UID}
+      FROM  ${Tables.AUTHORS}
+  
+  
+      LEFT JOIN ${Tables.USERS}
+        ON ${Tables.AUTHORS}.${AuthorsTable.UID} = ${Tables.USERS}.${UsersTable.UID}
+
+      WHERE lower(${UsersTable.NAME} || ' ' || ${UsersTable.SECOND_NAME}) LIKE('%${name}%')
+    ),
+
+
+    ${SelectAllParts.FILTERED} AS (
+      SELECT 
+        ${Tables.NEWS}.${NewsTable.ID}
+      FROM ${SelectAllParts.PRE_FILTERED}
+
+
+      LEFT JOIN ${Tables.NEWS}
+        ON ${SelectAllParts.PRE_FILTERED}.${UsersTable.UID} = ${Tables.NEWS}.${NewsTable.AUTHOR}
+      WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
+    )
+    `;
+
+type Filters = TagFilter | CategoryFilter | AuthorNameFilter;
 
 const filters = (f: Filters) => {
   switch (f.type) {
@@ -97,6 +128,8 @@ const filters = (f: Filters) => {
       return selectAllByTag(f);
     case 'category':
       return selectAllByCategory(f);
+    case 'authorName':
+      return selectAllByAuthorName(f);
     default:
       return '';
   }
