@@ -18,8 +18,6 @@ enum SelectAllParts {
   RESULT = 'all_result',
 }
 
-const equal = (what: string, to: number | string) => `${what} = '${to}'`;
-
 interface TagFilter {
   type: 'tag';
   filter: 'in' | 'all';
@@ -31,7 +29,7 @@ const selectAllByTag = ({ filter, value }: TagFilter) => {
 
   const minCount = filter === 'all' ? value.length : 1;
 
-  const whereCondition = value.map((v) => equal(TagsSubTable.ID, v));
+  const whereCondition = value.map((v) => `${TagsSubTable.ID} = '${v}'`);
 
   return `
   ${SelectAllParts.FILTERED} AS (
@@ -149,7 +147,33 @@ const selectAllByContent = ({ content }: ContentFilter) => `
   )
 `;
 
-type Filters = TagFilter | CategoryFilter | AuthorNameFilter | TitleFilter | ContentFilter;
+interface CreatedAtFilter {
+  type: 'createdAt';
+  filter: 'at' | 'gt' | 'lt';
+  value: string;
+}
+
+const SIGNS: Record<CreatedAtFilter['filter'], string> = {
+  at: '=',
+  gt: '>=',
+  lt: '<=',
+};
+
+const selectAllByCreatedAt = ({ filter, value }: CreatedAtFilter) => `
+  ${SelectAllParts.FILTERED} AS (
+    SELECT * 
+    FROM ${Tables.NEWS} 
+    WHERE ${NewsTable.CREATED_AT}::date ${SIGNS[filter]} '${value}'
+  )
+`;
+
+type Filters =
+  | TagFilter
+  | CategoryFilter
+  | AuthorNameFilter
+  | TitleFilter
+  | ContentFilter
+  | CreatedAtFilter;
 
 const filters = (f: Filters) => {
   switch (f.type) {
@@ -163,6 +187,8 @@ const filters = (f: Filters) => {
       return selectAllByTitle(f);
     case 'content':
       return selectAllByContent(f);
+    case 'createdAt':
+      return selectAllByCreatedAt(f);
     default:
       return '';
   }
