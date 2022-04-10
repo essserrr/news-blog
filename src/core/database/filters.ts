@@ -35,6 +35,10 @@ interface SearchFilter {
   value: string;
 }
 
+interface NoFilter {
+  type: 'noFilter';
+}
+
 type Filters =
   | TagFilter
   | CategoryFilter
@@ -42,7 +46,8 @@ type Filters =
   | TitleFilter
   | ContentFilter
   | CreatedAtFilter
-  | SearchFilter;
+  | SearchFilter
+  | NoFilter;
 
 export type {
   TagFilter,
@@ -53,4 +58,5 @@ export type {
   CreatedAtFilter,
   SearchFilter,
   Filters,
+  NoFilter,
 };

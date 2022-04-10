@@ -1,6 +1,5 @@
 import { Filters } from 'src/core/database/filters';
 import { validateReq, validateQuery } from 'src/core/validation';
-import { AppError } from 'src/core/errors';
 
 const splitTagString = (tagStr: string) => tagStr.replaceAll(/[[\]]/g, '').split(',');
 
@@ -96,7 +95,7 @@ const filter = (filterOptions: Record<string, unknown>): Filters => {
       return { type: 'tag', value, filter: 'in' };
     }
     default:
-      throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+      return { type: 'noFilter' };
   }
 };
 
