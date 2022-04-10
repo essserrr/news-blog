@@ -23,7 +23,7 @@ const sortTemplate = (sorting: SortingType) =>
       ${Parts.BODY}.${NewsTable.ID} DESC
   `;
 
-const noSort = () => ``;
+const noSort = () => `ORDER BY ${Parts.BODY}.${NewsTable.ID} DESC`;
 
 const sortByDate = () => `${Tables.NEWS}.${NewsTable.CREATED_AT} AS ${SelectAllFields.SORT},`;
 

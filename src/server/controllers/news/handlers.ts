@@ -1,4 +1,5 @@
 import { NewsInsertBody } from 'src/core/remote-client';
+import { mapNews } from 'src/core/news';
 import { Handler, respondWithError } from 'src/core/server';
 import { getTypedError, AppError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
@@ -38,7 +39,7 @@ const add: Handler = (app) => async (req, res) => {
       auxImages: validatedAuxImages,
     });
 
-    res.send({ data });
+    res.send({ data: mapNews(data) });
   } catch (e) {
     respondWithError(app, res, getTypedError(e));
   }
@@ -50,7 +51,7 @@ const get: Handler = (app) => async (req, res) => {
 
     const data = await app.db.news.get(nid);
 
-    res.send({ data });
+    res.send({ data: mapNews(data) });
   } catch (e) {
     respondWithError(app, res, getTypedError(e));
   }
@@ -92,7 +93,7 @@ const update: Handler = (app) => async (req, res) => {
       auxImages: validatedAuxImages,
     });
 
-    res.send({ data });
+    res.send({ data: mapNews(data) });
   } catch (e) {
     respondWithError(app, res, getTypedError(e));
   }
@@ -119,7 +120,6 @@ const getAll: Handler = (app) => async (req, res) => {
     const { offset = 0, limit = null, ...rest } = req.query;
     const filterApplied = filter(rest);
     const sortingApplied = sort(rest);
-    console.log(sortingApplied);
 
     const { offset: validatedOffset, limit: validatedLimit } = validateQuery({ offset, limit });
 
@@ -130,7 +130,7 @@ const getAll: Handler = (app) => async (req, res) => {
       sorting: sortingApplied,
     });
 
-    res.send({ data });
+    res.send({ data: { ...data, data: data.data.map((n) => mapNews(n)) } });
   } catch (e) {
     respondWithError(app, res, getTypedError(e));
   }
