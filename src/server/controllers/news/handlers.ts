@@ -3,6 +3,7 @@ import { Handler, respondWithError } from 'src/core/server';
 import { getTypedError, AppError } from 'src/core/errors';
 import { validateReq, validateQuery } from 'src/core/validation';
 import { filter } from 'src/core/filter';
+import { sort } from 'src/core/sort';
 
 const add: Handler = (app) => async (req, res) => {
   try {
@@ -117,8 +118,8 @@ const getAll: Handler = (app) => async (req, res) => {
   try {
     const { offset = 0, limit = null, ...rest } = req.query;
     const filterApplied = filter(rest);
-
-    console.log(filterApplied);
+    const sortingApplied = sort(rest);
+    console.log(sortingApplied);
 
     const { offset: validatedOffset, limit: validatedLimit } = validateQuery({ offset, limit });
 
@@ -126,6 +127,7 @@ const getAll: Handler = (app) => async (req, res) => {
       offset: validatedOffset,
       limit: validatedLimit,
       filter: filterApplied,
+      sorting: sortingApplied,
     });
 
     res.send({ data });

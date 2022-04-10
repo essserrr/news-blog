@@ -27,6 +27,9 @@ type Image = string;
 type Offset = number;
 type Limit = number | null;
 
+type DateString = string;
+type SortingType = 'asc' | 'desc';
+
 export type {
   Id,
   Name,
@@ -48,4 +51,6 @@ export type {
   Title,
   Content,
   Image,
+  SortingType,
+  DateString,
 };

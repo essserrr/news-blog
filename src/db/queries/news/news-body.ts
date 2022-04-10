@@ -12,6 +12,10 @@ enum NewsTable {
   CREATED_AT = 'created_at',
 }
 
+enum BodyRules {
+  SORT_BY_CREATED_AT = 'news_body_created_at_sort_desc',
+}
+
 const CURRENT_TABLE = Tables.NEWS;
 
 const newsBody = {
@@ -24,6 +28,10 @@ const newsBody = {
         ${NewsTable.MAIN_IMAGE} text NOT NULL,
         ${NewsTable.CREATED_AT} TIMESTAMP NOT NULL DEFAULT NOW()
     );
+
+    CREATE INDEX IF NOT EXISTS ${BodyRules.SORT_BY_CREATED_AT} 
+      ON ${CURRENT_TABLE} 
+    USING btree (${NewsTable.CREATED_AT} DESC);
 `,
 } as const;
 

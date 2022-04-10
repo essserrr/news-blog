@@ -217,6 +217,7 @@ const selectAllBySearch = ({ value }: SearchFilter) => {
     `;
 };
 
+// eslint-disable-next-line
 const selectAll = (_: NoFilter) => `
   ${SelectAllParts.FILTERED} AS (
     SELECT ${NewsTable.ID} FROM ${Tables.NEWS}

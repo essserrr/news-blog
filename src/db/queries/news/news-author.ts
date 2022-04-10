@@ -29,4 +29,7 @@ const authorObject = `
 )}
 ` as const;
 
-export { author, authorObject };
+const authorFullName =
+  `${Tables.USERS}.${UsersTable.NAME} || ' ' || ${Tables.USERS}.${UsersTable.SECOND_NAME}` as const;
+
+export { author, authorObject, authorFullName };

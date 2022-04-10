@@ -4,4 +4,8 @@ enum SelectAllParts {
   RESULT = 'all_result',
 }
 
-export { SelectAllParts };
+enum SelectAllFields {
+  SORT = 'sort_field',
+}
+
+export { SelectAllParts, SelectAllFields };

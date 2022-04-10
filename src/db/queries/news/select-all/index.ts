@@ -1,4 +1,6 @@
+import { Offset, Limit } from 'src/core/database';
 import { Filters } from 'src/core/database/filters';
+import { Sorting } from 'src/core/database/sorting';
 
 import { Tables } from '../../tables';
 import { timestampToInteger } from '../../converters';
@@ -16,16 +18,25 @@ import { Parts, NewsFields, Recursive } from '../constants';
 
 import { SelectAllParts } from './types';
 import { filters } from './filters';
+import { sorting } from './sorting';
+import { limitation } from './limitation';
 
-function selectAll(f: Filters) {
+function selectAll(f: Filters, s: Sorting, o: Offset, l: Limit) {
   const filterQuery = filters(f);
+  const [sortingQuery, sortField, sortType] = sorting(s);
+  const limitQuery = limitation(o, l);
 
   return `
   WITH RECURSIVE
     ${filterQuery},
 
     ${Parts.BODY} AS (
-      SELECT ${Tables.NEWS}.* FROM ${SelectAllParts.FILTERED}
+      SELECT 
+        ${sortType === 'date' ? sortField : ''}
+        ${Tables.NEWS}.*
+        
+      FROM ${SelectAllParts.FILTERED}
+      
 
       LEFT JOIN ${Tables.NEWS}
         ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS}.${NewsTable.ID}
@@ -33,6 +44,7 @@ function selectAll(f: Filters) {
 
     ${Parts.IMAGES} AS (
       SELECT 
+        ${sortType === 'photo' ? sortField : ''}
         ${SelectAllParts.FILTERED}.${NewsTable.ID},
         NULLIF(array_agg(${ImagesSubTable.PATH}), '{NULL}') as ${NewsFields.AUX_IMAGES}  
       FROM ${SelectAllParts.FILTERED}
@@ -44,31 +56,21 @@ function selectAll(f: Filters) {
     ),
 
     ${Parts.AUTHOR} AS (
-      SELECT
-        ${Parts.BODY}.${NewsTable.ID},
-        jsonb_build_object(${authorObject}) AS ${NewsTable.AUTHOR}
-      FROM ${Parts.BODY} 
+      SELECT * FROM (
+        SELECT
+          ${Parts.BODY}.${NewsTable.ID},
+          ${sortType === 'author' ? sortField : ''}
+          jsonb_build_object(${authorObject}) AS ${NewsTable.AUTHOR}
+        FROM ${Parts.BODY} 
 
-      LEFT JOIN ${Tables.AUTHORS}
-        ON ${Parts.BODY}.${NewsTable.AUTHOR} = ${Tables.AUTHORS}.${AuthorsTable.UID}
-      LEFT JOIN ${Tables.USERS}
-        ON ${Parts.BODY}.${NewsTable.AUTHOR} = ${Tables.USERS}.${UsersTable.UID} 
+        LEFT JOIN ${Tables.AUTHORS}
+          ON ${Parts.BODY}.${NewsTable.AUTHOR} = ${Tables.AUTHORS}.${AuthorsTable.UID}
+        LEFT JOIN ${Tables.USERS}
+          ON ${Parts.BODY}.${NewsTable.AUTHOR} = ${Tables.USERS}.${UsersTable.UID} 
+      ) AS author_temp
     ),
 
-    
-    ${Parts.TAGS} AS (
-      SELECT
-        ${Tables.NEWS_TAGS}.${TagsSubTable.NID} AS ${NewsTable.ID},
-        NULLIF(array_agg(jsonb_build_object(${tagsObject})), '{NULL}') AS ${NewsFields.TAGS}
-      FROM ${SelectAllParts.FILTERED}
 
-      LEFT JOIN ${Tables.NEWS_TAGS}
-        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
-      LEFT JOIN ${Tables.TAGS}
-        ON ${Tables.TAGS}.${TagsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.ID}
-
-      GROUP BY ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
-    ),
 
     ${Parts.CATEGORIES} AS (
       SELECT 
@@ -100,12 +102,27 @@ function selectAll(f: Filters) {
 
     ${Parts.CATEGORIES_FULL} AS (
         SELECT 
+          ${sortType === 'category' ? sortField : ''}
           ${Parts.CATEGORIES}.${TagsSubTable.NID} AS ${NewsTable.ID},
           NULLIF(array_agg(jsonb_build_object(${categoryObject})), '{NULL}') AS ${
     NewsTable.CATEGORY
   }
         FROM ${Parts.CATEGORIES} 
         GROUP BY ${Parts.CATEGORIES}.${TagsSubTable.NID}
+    ),
+
+    ${Parts.TAGS} AS (
+      SELECT
+        ${Tables.NEWS_TAGS}.${TagsSubTable.NID} AS ${NewsTable.ID},
+        NULLIF(array_agg(jsonb_build_object(${tagsObject})), '{NULL}') AS ${NewsFields.TAGS}
+      FROM ${SelectAllParts.FILTERED}
+
+      LEFT JOIN ${Tables.NEWS_TAGS}
+        ON ${SelectAllParts.FILTERED}.${NewsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
+      LEFT JOIN ${Tables.TAGS}
+        ON ${Tables.TAGS}.${TagsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.ID}
+
+      GROUP BY ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
     ),
 
     ${SelectAllParts.RESULT} AS (
@@ -121,6 +138,8 @@ function selectAll(f: Filters) {
         ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.TAGS}.${NewsTable.ID}
       LEFT JOIN ${Parts.CATEGORIES_FULL}
         ON ${Parts.BODY}.${NewsTable.ID} = ${Parts.CATEGORIES_FULL}.${NewsTable.ID}
+
+      ${sortingQuery} ${limitQuery}
     )
 
 
@@ -133,21 +152,3 @@ function selectAll(f: Filters) {
 }
 
 export { selectAll };
-
-/*
-`
-  WITH RECURSIVE
-    ${filterQuery},
-
-    ${SelectAllParts.RESULT} AS (
-      SELECT 
-        * 
-      FROM ${SelectAllParts.FILTERED}
-    )
-
-  SELECT 
-    (SELECT COUNT(*) FROM ${SelectAllParts.RESULT}) as count,
-    (
-      SELECT json_agg(${SelectAllParts.RESULT}.*) FROM ${SelectAllParts.RESULT}
-    ) AS rows;`;
-*/

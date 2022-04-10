@@ -5,6 +5,7 @@ import { Author } from 'src/core/authors';
 import { NewsUnderscored, NewsRequest, CheckAuthor } from 'src/core/news';
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import { Filters } from './filters';
+import { Sorting } from './sorting';
 import {
   Id,
   Name,
@@ -26,6 +27,8 @@ import {
   Title,
   Content,
   Image,
+  DateString,
+  SortingType,
 } from './entities';
 
 type Require<T> = {
@@ -85,6 +88,7 @@ interface Database {
     getAll: (options: {
       filter: Filters;
       offset: Offset;
+      sorting: Sorting;
       limit: Limit;
     }) => Promise<PaginatedResult<NewsUnderscored>>;
     update: (nid: Uid, options: NewsRequest) => Promise<NewsUnderscored>;
@@ -117,6 +121,8 @@ export type {
   Title,
   Content,
   Image,
+  DateString,
+  SortingType,
 };
 export type { Offset, Limit };
 export type { DbPage, PaginatedResult, DatabaseOptionalValue };

@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { Limit, Offset, Id, Uid, Username } from 'src/core/database';
+import { Limit, Offset, Id, Uid, Username, SortingType, DateString } from 'src/core/database';
 import { AppError } from 'src/core/errors';
 
 import { Validated, NotValidated } from './types';
@@ -46,10 +46,18 @@ const validateString = (str: unknown): string => {
   return str;
 };
 
-const validateDate = (str: unknown): string => {
+const validateDate = (str: unknown): DateString => {
   if (!str || typeof str !== 'string')
     throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
   if (!/\d{4,4}-\d{2,2}-\d{2,2}/.test(str))
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  return str;
+};
+
+const validateSorting = (str: unknown): SortingType => {
+  if (!str || typeof str !== 'string')
+    throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
+  if (str !== 'asc' && str !== 'desc')
     throw new AppError({ code: 'WRONG_FORMAT', errorType: 'Validation error' });
   return str;
 };
@@ -62,6 +70,7 @@ const validators = {
   username: validateUsername,
   string: validateString,
   date: validateDate,
+  sorting: validateSorting,
 } as const;
 
 interface QueryRes {
@@ -71,7 +80,8 @@ interface QueryRes {
   uid: Uid;
   username: Username;
   string: string;
-  date: string;
+  date: DateString;
+  sorting: SortingType;
 }
 
 type QueryParams = NotValidated<QueryRes>;
