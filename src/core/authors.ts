@@ -3,4 +3,6 @@ interface Author {
   description: string | null;
 }
 
-export type { Author };
+type CheckAuthor = { author: string | null };
+
+export type { Author, CheckAuthor };

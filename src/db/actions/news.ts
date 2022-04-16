@@ -1,5 +1,6 @@
 import { QueryResult } from 'pg';
-import { NewsUnderscored, CheckAuthor } from 'src/core/news';
+import { NewsUnderscored } from 'src/core/news';
+import { CheckAuthor } from 'src/core/authors';
 import { Database, DbPage } from 'src/core/database';
 import { AppError } from 'src/core/errors';
 import { DbInstance } from '../types';

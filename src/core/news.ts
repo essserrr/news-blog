@@ -43,8 +43,6 @@ interface NewsRequest {
   auxImages: Array<string>;
 }
 
-type CheckAuthor = { author: string | null };
-
 const mapNewsAuthor = ({
   uid,
   name,
@@ -87,5 +85,5 @@ const mapNews = ({
   createdAt: created_at,
 });
 
-export type { News, NewsUnderscored, NewsRequest, CheckAuthor };
+export type { News, NewsUnderscored, NewsRequest };
 export { mapNews };

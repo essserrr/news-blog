@@ -1,8 +1,8 @@
 import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
 import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
-import { Author } from 'src/core/authors';
-import { NewsUnderscored, NewsRequest, CheckAuthor } from 'src/core/news';
+import { Author, CheckAuthor } from 'src/core/authors';
+import { NewsUnderscored, NewsRequest } from 'src/core/news';
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import { Filters } from './filters';
 import { Sorting } from './sorting';

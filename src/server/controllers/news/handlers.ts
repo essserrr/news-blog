@@ -8,9 +8,8 @@ import { sort } from 'src/core/sort';
 
 const add: Handler = (app) => async (req, res) => {
   try {
-    if (res.locals?.auth?.uid !== req.params.id) throw new AppError({ code: 'FORBIDDEN' });
-
     const { uid } = validateQuery({ uid: req.params.id });
+    if (res.locals?.auth?.uid !== uid) throw new AppError({ code: 'FORBIDDEN' });
 
     const { title, content, category, tags, mainImage, auxImages }: NewsInsertBody = req.body || {};
     const {
@@ -60,10 +59,10 @@ const get: Handler = (app) => async (req, res) => {
 const update: Handler = (app) => async (req, res) => {
   try {
     const { uid: nid } = validateQuery({ uid: req.params.id });
-
     const { author } = await app.db.news.checkAuthor(nid);
-    if (author === null || res.locals?.auth?.uid !== author)
-      throw new AppError({ code: 'FORBIDDEN' });
+
+    const { uid } = validateQuery({ uid: author });
+    if (res.locals?.auth?.uid !== uid) throw new AppError({ code: 'FORBIDDEN' });
 
     const { title, content, category, tags, mainImage, auxImages }: NewsInsertBody = req.body || {};
 
@@ -84,7 +83,7 @@ const update: Handler = (app) => async (req, res) => {
     });
 
     const data = await app.db.news.update(nid, {
-      author,
+      author: uid,
       title: validatedTitle,
       content: validatedContent,
       category: validatedCategoryId,
@@ -102,12 +101,12 @@ const update: Handler = (app) => async (req, res) => {
 const remove: Handler = (app) => async (req, res) => {
   try {
     const { uid: nid } = validateQuery({ uid: req.params.id });
-
     const { author } = await app.db.news.checkAuthor(nid);
-    if (author === null || res.locals?.auth?.uid !== author)
-      throw new AppError({ code: 'FORBIDDEN' });
 
-    const data = await app.db.news.remove(nid, author);
+    const { uid } = validateQuery({ uid: author });
+    if (res.locals?.auth?.uid !== uid) throw new AppError({ code: 'FORBIDDEN' });
+
+    const data = await app.db.news.remove(nid, uid);
 
     res.send({ data });
   } catch (e) {
