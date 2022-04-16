@@ -3,6 +3,8 @@ import { Category } from 'src/core/categories';
 import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
 import { Author, CheckAuthor } from 'src/core/authors';
 import { NewsUnderscored, NewsRequest } from 'src/core/news';
+import { Comment } from 'src/core/comments';
+
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
 import { Filters } from './filters';
 import { Sorting } from './sorting';
@@ -49,6 +51,8 @@ type UserLogin = Require<Pick<User, 'authToken'>>;
 type AuthorInsert = Author;
 type AuthorUpdate = UpdateRequest<Omit<Author, 'uid'>>;
 
+type CommentInsert = Omit<Comment, 'id'>;
+
 interface Database {
   tags: {
     add: (options: TagUpdate) => Promise<Tag>;
@@ -94,6 +98,11 @@ interface Database {
     update: (nid: Uid, options: NewsRequest) => Promise<NewsUnderscored>;
     checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
     remove: (nid: Uid, uid: Uid) => Promise<MessageResponse>;
+  };
+  comments: {
+    add: (options: CommentInsert) => Promise<Comment>;
+    remove: (id: Uid) => Promise<MessageResponse>;
+    getAll: (nid: Uid, offset: Offset, limit: Limit) => Promise<PaginatedResult<Comment>>;
   };
 }
 

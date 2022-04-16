@@ -2,6 +2,7 @@ import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
 import { User } from 'src/core/user';
 import { Author } from 'src/core/authors';
+import { Comment } from 'src/core/comments';
 
 type TagBody = Omit<Tag, 'id'>;
 
@@ -14,6 +15,8 @@ type UserSignupBody = Omit<User, 'uid' | 'authToken' | 'isAdmin' | 'createdAt' |
 type AuthorWithoutUid = Omit<Author, 'uid'>;
 type AuthorInsertBody = AuthorWithoutUid;
 type AuthorUpdateBody = Partial<AuthorWithoutUid>;
+
+type CommentInsertBody = Omit<Comment, 'id' | 'nid'>;
 
 interface NewsInsertBody {
   title: string;
@@ -32,4 +35,5 @@ export type {
   AuthorInsertBody,
   AuthorUpdateBody,
   NewsInsertBody,
+  CommentInsertBody,
 };

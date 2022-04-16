@@ -31,6 +31,7 @@ const initTables = async (pool: Pool, logger: Logger) => {
     ${queries.users.createUsersTable} 
     ${queries.authors.createAuthorsTable}
     ${queries.news.createNewsTable}
+    ${queries.comments.createCommentsTable}
     `,
   );
   logger.debug('Tables initiated');
