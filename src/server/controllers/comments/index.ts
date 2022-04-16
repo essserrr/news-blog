@@ -5,9 +5,8 @@ import { authMiddleware, ProtectedMethods } from 'src/server/middleware/auth';
 import { getAll, add, remove } from './handlers';
 
 const protectedMethods: ProtectedMethods = {
-  /* POST: true,
-  PATCH: true,
-  DELETE: true, !!!!!!!!!! */
+  POST: true,
+  DELETE: true,
 };
 
 const initCommentsRouter = (app: App) => {

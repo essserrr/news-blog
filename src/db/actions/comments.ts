@@ -1,6 +1,7 @@
 import { QueryResult } from 'pg';
 import { Comment } from 'src/core/comments';
 import { Database, DbPage } from 'src/core/database';
+import { CheckAuthor } from 'src/core/authors';
 import { AppError } from 'src/core/errors';
 import { DbInstance } from '../types';
 
@@ -29,9 +30,9 @@ const addComment =
       message,
     ]);
 
-    const tag = res.rows[0];
-    if (!tag) throw new AppError({ errorType: 'Database error', code: 'UNKNOWN_ERROR' });
-    return tag;
+    const comment = res.rows[0];
+    if (!comment) throw new AppError({ errorType: 'Database error', code: 'UNKNOWN_ERROR' });
+    return comment;
   };
 
 const removeComment =
@@ -45,4 +46,16 @@ const removeComment =
     };
   };
 
-export { addComment, getAllComments, removeComment };
+const checkCommentAuthor =
+  ({ logger, pool, queries }: DbInstance): Database['comments']['checkAuthor'] =>
+  async (id) => {
+    logger.debug(`Checking author for comment: ${id}`);
+
+    const res: QueryResult<CheckAuthor> = await pool.query(queries.comments.checkAuthor, [id]);
+
+    const author = res.rows[0];
+    if (!author) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });
+    return author;
+  };
+
+export { addComment, getAllComments, removeComment, checkCommentAuthor };

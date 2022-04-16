@@ -76,7 +76,7 @@ const updateNews =
     return news;
   };
 
-const checkAuthor =
+const checkNewsAuthor =
   ({ logger, pool, queries }: DbInstance): Database['news']['checkAuthor'] =>
   async (nid) => {
     logger.debug(`Checking author for news: ${nid}`);
@@ -99,4 +99,4 @@ const removeNews =
     };
   };
 
-export { addNews, getNews, updateNews, checkAuthor, removeNews, getAllNews };
+export { addNews, getNews, updateNews, checkNewsAuthor, removeNews, getAllNews };

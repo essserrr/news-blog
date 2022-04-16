@@ -59,9 +59,9 @@ const get: Handler = (app) => async (req, res) => {
 const update: Handler = (app) => async (req, res) => {
   try {
     const { uid: nid } = validateQuery({ uid: req.params.id });
-    const { author } = await app.db.news.checkAuthor(nid);
 
-    const { uid } = validateQuery({ uid: author });
+    const { author: authorUid } = await app.db.news.checkAuthor(nid);
+    const { uid } = validateQuery({ uid: authorUid });
     if (res.locals?.auth?.uid !== uid) throw new AppError({ code: 'FORBIDDEN' });
 
     const { title, content, category, tags, mainImage, auxImages }: NewsInsertBody = req.body || {};
@@ -101,9 +101,9 @@ const update: Handler = (app) => async (req, res) => {
 const remove: Handler = (app) => async (req, res) => {
   try {
     const { uid: nid } = validateQuery({ uid: req.params.id });
-    const { author } = await app.db.news.checkAuthor(nid);
 
-    const { uid } = validateQuery({ uid: author });
+    const { author: authorUid } = await app.db.news.checkAuthor(nid);
+    const { uid } = validateQuery({ uid: authorUid });
     if (res.locals?.auth?.uid !== uid) throw new AppError({ code: 'FORBIDDEN' });
 
     const data = await app.db.news.remove(nid, uid);

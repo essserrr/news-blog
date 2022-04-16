@@ -34,6 +34,10 @@ const comments = {
 
   delete: `DELETE FROM ${CURRENT_TABLE}	WHERE ${CommentsTable.ID}=$1;`,
 
+  checkAuthor: `
+    SELECT ${CommentsTable.UID} AS ${NewsTable.AUTHOR} FROM ${Tables.COMMENTS} WHERE ${CommentsTable.ID}=$1;
+  `,
+
   selectAll: `
     SELECT
       (SELECT COUNT(*) FROM ${CURRENT_TABLE}) as count, 

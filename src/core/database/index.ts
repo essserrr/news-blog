@@ -102,6 +102,7 @@ interface Database {
   comments: {
     add: (options: CommentInsert) => Promise<Comment>;
     remove: (id: Uid) => Promise<MessageResponse>;
+    checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
     getAll: (nid: Uid, offset: Offset, limit: Limit) => Promise<PaginatedResult<Comment>>;
   };
 }

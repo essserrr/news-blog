@@ -13,8 +13,15 @@ import {
 import { signup, getUser, removeUser } from './actions/users';
 import { login, logout, checkPass, checkToken } from './actions/auth';
 import { addAuthor, updateAuthor, getAuthor, removeAuthor, getAllAuthors } from './actions/authors';
-import { addNews, getNews, updateNews, checkAuthor, removeNews, getAllNews } from './actions/news';
-import { addComment, getAllComments, removeComment } from './actions/comments';
+import {
+  addNews,
+  getNews,
+  updateNews,
+  checkNewsAuthor,
+  removeNews,
+  getAllNews,
+} from './actions/news';
+import { addComment, getAllComments, removeComment, checkCommentAuthor } from './actions/comments';
 
 import { DbInstance } from './types';
 import queries from './queries';
@@ -69,7 +76,7 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       get: getNews(instance),
       getAll: getAllNews(instance),
       update: updateNews(instance),
-      checkAuthor: checkAuthor(instance),
+      checkAuthor: checkNewsAuthor(instance),
       remove: removeNews(instance),
     },
 
@@ -77,6 +84,7 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       add: addComment(instance),
       getAll: getAllComments(instance),
       remove: removeComment(instance),
+      checkAuthor: checkCommentAuthor(instance),
     },
   };
 };
