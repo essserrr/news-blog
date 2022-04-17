@@ -2,12 +2,12 @@ import { Tag } from 'src/core/tags';
 import { Category } from 'src/core/categories';
 import { User, UserUnderscored, UserPasswordReq, UserAuthReq } from 'src/core/user';
 import { Author, CheckAuthor } from 'src/core/authors';
-import { NewsUnderscored, NewsRequest } from 'src/core/news';
+import { NewsUnderscored, NewsRequest, DraftUnderscored, DraftRequest } from 'src/core/news';
 import { Comment } from 'src/core/comments';
 
 import { DbPage, PaginatedResult, UpdateRequest, DatabaseOptionalValue } from './types';
-import { Filters } from './filters';
-import { Sorting } from './sorting';
+import { Filters, AuthorFilter } from './filters';
+import { Sorting, DateSort } from './sorting';
 import {
   Id,
   Name,
@@ -91,11 +91,24 @@ interface Database {
     get: (nid: Uid) => Promise<NewsUnderscored>;
     getAll: (options: {
       filter: Filters;
-      offset: Offset;
       sorting: Sorting;
+      offset: Offset;
       limit: Limit;
     }) => Promise<PaginatedResult<NewsUnderscored>>;
     update: (nid: Uid, options: NewsRequest) => Promise<NewsUnderscored>;
+    checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
+    remove: (nid: Uid, uid: Uid) => Promise<MessageResponse>;
+  };
+  drafts: {
+    add: (options: DraftRequest) => Promise<DraftUnderscored>;
+    get: (nid: Uid) => Promise<DraftUnderscored>;
+    getAll: (options: {
+      filter: AuthorFilter;
+      sorting: DateSort;
+      offset: Offset;
+      limit: Limit;
+    }) => Promise<PaginatedResult<DraftUnderscored>>;
+    update: (nid: Uid, options: DraftRequest) => Promise<DraftUnderscored>;
     checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
     remove: (nid: Uid, uid: Uid) => Promise<MessageResponse>;
   };

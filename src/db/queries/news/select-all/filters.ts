@@ -7,6 +7,7 @@ import {
   CreatedAtFilter,
   SearchFilter,
   Filters,
+  AuthorFilter,
   NoFilter,
 } from 'src/core/database/filters';
 
@@ -21,7 +22,7 @@ import { NewsTable } from '../news-body';
 
 import { SelectAllParts } from './types';
 
-const selectAllByTag = ({ filter, value }: TagFilter) => {
+const selectAllByTag = ({ filter, value, isDraft }: TagFilter) => {
   const LOCAL_TABLE = 'a';
 
   const minCount = filter === 'all' ? value.length : 1;
@@ -29,7 +30,7 @@ const selectAllByTag = ({ filter, value }: TagFilter) => {
   const whereCondition = value.map((v) => `${TagsSubTable.ID} = '${v}'`);
 
   return `
-    ${SelectAllParts.FILTERED} AS (
+    ${SelectAllParts.PRE_FILTERED} AS (
   
       SELECT ${LOCAL_TABLE}.${TagsSubTable.NID} as ${NewsTable.ID} FROM
         (SELECT 
@@ -40,11 +41,26 @@ const selectAllByTag = ({ filter, value }: TagFilter) => {
         ) AS ${LOCAL_TABLE}
   
       WHERE ${LOCAL_TABLE}.count >= '${minCount}'
-    )
+    ),
+
+    ${SelectAllParts.FILTERED} AS (
+      SELECT 
+        ${Tables.NEWS}.${NewsTable.ID}
+      FROM ${SelectAllParts.PRE_FILTERED}
+
+
+      LEFT JOIN ${Tables.NEWS}
+        ON ${SelectAllParts.PRE_FILTERED}.${TagsSubTable.NID} = ${Tables.NEWS}.${NewsTable.ID}
+          
+      WHERE 
+        ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL 
+          AND 
+        ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
+  )
     `;
 };
 
-const selectAllByCategory = ({ value }: CategoryFilter) => `
+const selectAllByCategory = ({ value, isDraft }: CategoryFilter) => `
     ${SelectAllParts.PRE_FILTERED} AS (
       SELECT 
         ${Tables.CATEGORIES}.${CategoriesTable.ID}, 
@@ -74,11 +90,11 @@ const selectAllByCategory = ({ value }: CategoryFilter) => `
       LEFT JOIN ${Tables.NEWS}
         ON ${SelectAllParts.PRE_FILTERED}.${CategoriesTable.ID} = ${Tables.NEWS}.${NewsTable.CATEGORY}
   
-      WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
+      WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL AND ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
     )
   `;
 
-const selectAllByAuthorName = ({ value }: AuthorNameFilter) => `
+const selectAllByAuthorName = ({ value, isDraft }: AuthorNameFilter) => `
     ${SelectAllParts.PRE_FILTERED} AS (
         SELECT 
           ${Tables.USERS}.${UsersTable.UID}
@@ -100,27 +116,28 @@ const selectAllByAuthorName = ({ value }: AuthorNameFilter) => `
   
         LEFT JOIN ${Tables.NEWS}
           ON ${SelectAllParts.PRE_FILTERED}.${UsersTable.UID} = ${Tables.NEWS}.${NewsTable.AUTHOR}
-        WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
+            
+        WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL AND ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
     )
   `;
 
-const selectAllByTitle = ({ value }: TitleFilter) => `
+const selectAllByTitle = ({ value, isDraft }: TitleFilter) => `
     ${SelectAllParts.FILTERED} AS (
       SELECT 
         ${Tables.NEWS}.${NewsTable.ID}
       FROM ${Tables.NEWS}
   
-      WHERE lower(${NewsTable.TITLE}) LIKE('%${value}%')
+      WHERE lower(${NewsTable.TITLE}) LIKE('%${value}%') AND ${NewsTable.IS_DRAFT}='${isDraft}'
     )
   `;
 
-const selectAllByContent = ({ value }: ContentFilter) => `
+const selectAllByContent = ({ value, isDraft }: ContentFilter) => `
     ${SelectAllParts.FILTERED} AS (
       SELECT 
         ${Tables.NEWS}.${NewsTable.ID}
       FROM ${Tables.NEWS}
   
-      WHERE lower(${NewsTable.CONTENT}) LIKE('%${value}%')
+      WHERE lower(${NewsTable.CONTENT}) LIKE('%${value}%') AND ${NewsTable.IS_DRAFT}='${isDraft}'
     )
   `;
 
@@ -130,15 +147,15 @@ const SIGNS: Record<CreatedAtFilter['filter'], string> = {
   lt: '<=',
 };
 
-const selectAllByCreatedAt = ({ filter, value }: CreatedAtFilter) => `
+const selectAllByCreatedAt = ({ filter, value, isDraft }: CreatedAtFilter) => `
     ${SelectAllParts.FILTERED} AS (
       SELECT * 
       FROM ${Tables.NEWS} 
-      WHERE ${NewsTable.CREATED_AT}::date ${SIGNS[filter]} '${value}'
+      WHERE ${NewsTable.CREATED_AT}::date ${SIGNS[filter]} '${value}' AND ${NewsTable.IS_DRAFT}='${isDraft}'
     )
   `;
 
-const selectAllBySearch = ({ value }: SearchFilter) => {
+const selectAllBySearch = ({ value, isDraft }: SearchFilter) => {
   const authorsLike = 'authors_l';
   const authorNews = 'authors_n';
 
@@ -170,7 +187,7 @@ const selectAllBySearch = ({ value }: SearchFilter) => {
   
       LEFT JOIN ${Tables.NEWS}
         ON ${authorsLike}.${UsersTable.UID} = ${Tables.NEWS}.${NewsTable.AUTHOR}
-      WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL
+      WHERE ${Tables.NEWS}.${NewsTable.ID} IS NOT NULL AND ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
     ),
   
     ${contentNews} AS (
@@ -178,7 +195,7 @@ const selectAllBySearch = ({ value }: SearchFilter) => {
         ${Tables.NEWS}.${NewsTable.ID}
       FROM ${Tables.NEWS}
   
-      WHERE lower(${NewsTable.CONTENT}) LIKE('%${value}%')
+      WHERE lower(${NewsTable.CONTENT}) LIKE('%${value}%') AND ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
     ),
   
     ${tagsNews} AS (
@@ -190,7 +207,7 @@ const selectAllBySearch = ({ value }: SearchFilter) => {
       RIGHT JOIN ${Tables.NEWS_TAGS}
         ON ${Tables.NEWS_TAGS}.${TagsSubTable.ID} = ${Tables.TAGS}.${TagsTable.ID}
   
-      WHERE lower(${Tables.TAGS}.${TagsTable.NAME}) LIKE('%${value}%')
+      WHERE lower(${Tables.TAGS}.${TagsTable.NAME}) LIKE('%${value}%') AND ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
     ),
   
     ${categoriesLike} AS (
@@ -202,7 +219,7 @@ const selectAllBySearch = ({ value }: SearchFilter) => {
       RIGHT JOIN ${Tables.NEWS}
         ON ${Tables.NEWS}.${NewsTable.CATEGORY} = ${Tables.CATEGORIES}.${CategoriesTable.ID}
   
-      WHERE lower(${Tables.CATEGORIES}.${CategoriesTable.NAME}) LIKE('%${value}%')
+      WHERE lower(${Tables.CATEGORIES}.${CategoriesTable.NAME}) LIKE('%${value}%') AND ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
     ),
   
     ${SelectAllParts.FILTERED} AS (
@@ -216,6 +233,14 @@ const selectAllBySearch = ({ value }: SearchFilter) => {
     )
     `;
 };
+
+const selectAllByAuthor = ({ value, isDraft }: AuthorFilter) => `
+      ${SelectAllParts.FILTERED} AS (
+        SELECT * 
+        FROM ${Tables.NEWS} 
+        WHERE (${NewsTable.AUTHOR}='${value}' AND ${NewsTable.IS_DRAFT}='${isDraft}')
+      )
+  `;
 
 // eslint-disable-next-line
 const selectAll = (_: NoFilter) => `
@@ -240,6 +265,8 @@ const filters = (f: Filters) => {
       return selectAllByCreatedAt(f);
     case 'search':
       return selectAllBySearch(f);
+    case 'author':
+      return selectAllByAuthor(f);
     default:
       return selectAll(f);
   }

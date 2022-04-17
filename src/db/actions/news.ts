@@ -18,6 +18,7 @@ const addNews =
       mainImage,
       tags,
       auxImages,
+      false,
     ]);
 
     const news = res.rows[0];
@@ -81,7 +82,7 @@ const checkNewsAuthor =
   async (nid) => {
     logger.debug(`Checking author for news: ${nid}`);
 
-    const res: QueryResult<CheckAuthor> = await pool.query(queries.news.checkAuthor, [nid]);
+    const res: QueryResult<CheckAuthor> = await pool.query(queries.news.checkAuthor, [nid, false]);
 
     const news = res.rows[0];
     if (!news) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });

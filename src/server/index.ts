@@ -11,6 +11,7 @@ import initAuth from './controllers/auth';
 import initAuthors from './controllers/authors';
 import initNews from './controllers/news';
 import initCommentsRouter from './controllers/comments';
+import initDraftsRouter from './controllers/drafts';
 import { notFound } from './controllers/not-found';
 
 interface InitServerProps {
@@ -34,6 +35,7 @@ const initServer = ({ app, secretKey }: InitServerProps) => {
   server.use('/authors', initAuthors(app));
   server.use('/news', initNews(app));
   server.use('/comments', initCommentsRouter(app));
+  server.use('/drafts', initDraftsRouter(app));
 
   server.get('*', notFound(app));
 

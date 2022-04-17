@@ -10,6 +10,7 @@ enum NewsTable {
   CATEGORY = 'category',
   MAIN_IMAGE = 'main_image',
   CREATED_AT = 'created_at',
+  IS_DRAFT = 'is_draft',
 }
 
 enum BodyRules {
@@ -26,7 +27,8 @@ const newsBody = {
         ${NewsTable.CONTENT} text NOT NULL,
         ${NewsTable.CATEGORY} serial REFERENCES ${Tables.CATEGORIES} (${CategoriesTable.ID}) ON DELETE SET NULL,
         ${NewsTable.MAIN_IMAGE} text NOT NULL,
-        ${NewsTable.CREATED_AT} TIMESTAMP NOT NULL DEFAULT NOW()
+        ${NewsTable.CREATED_AT} TIMESTAMP NOT NULL DEFAULT NOW(),
+        ${NewsTable.IS_DRAFT} boolean NOT NULL DEFAULT FALSE
     );
 
     CREATE INDEX IF NOT EXISTS ${BodyRules.SORT_BY_CREATED_AT} 

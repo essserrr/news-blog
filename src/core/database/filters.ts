@@ -1,39 +1,46 @@
-interface TagFilter {
+type Draftable<T> = T & { isDraft: boolean };
+
+type TagFilter = Draftable<{
   type: 'tag';
   filter: 'in' | 'all';
   value: Array<number>;
-}
+}>;
 
-interface CategoryFilter {
+type CategoryFilter = Draftable<{
   type: 'category';
   value: number;
-}
+}>;
 
-interface AuthorNameFilter {
+type AuthorNameFilter = Draftable<{
   type: 'authorName';
   value: string;
-}
+}>;
 
-interface TitleFilter {
+type TitleFilter = Draftable<{
   type: 'title';
   value: string;
-}
+}>;
 
-interface ContentFilter {
+type ContentFilter = Draftable<{
   type: 'content';
   value: string;
-}
+}>;
 
-interface CreatedAtFilter {
+type CreatedAtFilter = Draftable<{
   type: 'createdAt';
   filter: 'at' | 'gt' | 'lt';
   value: string;
-}
+}>;
 
-interface SearchFilter {
+type SearchFilter = Draftable<{
   type: 'search';
   value: string;
-}
+}>;
+
+type AuthorFilter = Draftable<{
+  type: 'author';
+  value: string;
+}>;
 
 interface NoFilter {
   type: 'noFilter';
@@ -47,6 +54,7 @@ type Filters =
   | ContentFilter
   | CreatedAtFilter
   | SearchFilter
+  | AuthorFilter
   | NoFilter;
 
 export type {
@@ -58,5 +66,6 @@ export type {
   CreatedAtFilter,
   SearchFilter,
   Filters,
+  AuthorFilter,
   NoFilter,
 };

@@ -21,6 +21,14 @@ import {
   removeNews,
   getAllNews,
 } from './actions/news';
+import {
+  addDraft,
+  getDraft,
+  updateDraft,
+  checkDraftAuthor,
+  removeDraft,
+  getAllDraft,
+} from './actions/drafts';
 import { addComment, getAllComments, removeComment, checkCommentAuthor } from './actions/comments';
 
 import { DbInstance } from './types';
@@ -78,6 +86,14 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       update: updateNews(instance),
       checkAuthor: checkNewsAuthor(instance),
       remove: removeNews(instance),
+    },
+    drafts: {
+      add: addDraft(instance),
+      get: getDraft(instance),
+      getAll: getAllDraft(instance),
+      update: updateDraft(instance),
+      checkAuthor: checkDraftAuthor(instance),
+      remove: removeDraft(instance),
     },
 
     comments: {

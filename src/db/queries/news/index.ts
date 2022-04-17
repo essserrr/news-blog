@@ -10,7 +10,7 @@ import { newsBody, NewsTable } from './news-body';
 import { newsImages, ImagesSubTable } from './news-images';
 import { author } from './news-author';
 import { Parts, NewsFields, Recursive } from './constants';
-import { selectAll } from './select-all';
+import { selectAll, selectAllDrafts } from './select-all';
 
 const bodyPart = {
   ALL: `${Parts.BODY}.*`,
@@ -57,8 +57,9 @@ const news = {
             ${NewsTable.TITLE}, 
             ${NewsTable.CONTENT}, 
             ${NewsTable.CATEGORY}, 
-            ${NewsTable.MAIN_IMAGE}
-          ) VALUES ($1, $2, $3, $4, $5) RETURNING *
+            ${NewsTable.MAIN_IMAGE}, 
+            ${NewsTable.IS_DRAFT}
+          ) VALUES ($1, $2, $3, $4, $5, $8) RETURNING *
         ),
 
       ${Parts.TAGS} AS (
@@ -126,7 +127,7 @@ const news = {
     FROM ${Parts.BODY};`,
 
   checkAuthor: `
-    SELECT ${NewsTable.AUTHOR} FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1;
+    SELECT ${NewsTable.AUTHOR} FROM ${Tables.NEWS} WHERE (${NewsTable.ID}=$1 AND ${NewsTable.IS_DRAFT}=$2);
   `,
 
   select: `
@@ -203,10 +204,10 @@ const news = {
           ${NewsTable.CONTENT}=$4, 
           ${NewsTable.CATEGORY}=$5, 
           ${NewsTable.MAIN_IMAGE}=$6
-        WHERE (${NewsTable.ID}=$1 AND ${NewsTable.AUTHOR}=$2 ) RETURNING *
+        WHERE (${NewsTable.ID}=$1 AND ${NewsTable.AUTHOR}=$2) RETURNING *
       ),
 
-    test_delete AS (
+    clear_tags AS (
       DELETE FROM ${Tables.NEWS_TAGS} WHERE ${TagsSubTable.NID}=$1
     ),
 
@@ -248,7 +249,7 @@ const news = {
         ${Parts.CATEGORIES}.${CategoriesTable.PID}
     ),
 
-    test_delete2 AS (
+    clear_images AS (
       DELETE FROM ${Tables.NEWS_IMAGES} WHERE ${ImagesSubTable.NID}=$1
     ),
 
@@ -279,6 +280,7 @@ const news = {
   FROM ${Parts.BODY};`,
 
   selectAll,
+  selectAllDrafts,
 } as const;
 
 export { NewsTable, news };

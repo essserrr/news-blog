@@ -27,6 +27,8 @@ interface NewsInsertBody {
   auxImages: Array<string>;
 }
 
+type DraftInsertBody = NewsInsertBody;
+
 export type {
   TagBody,
   CategoryInsertBody,
@@ -36,4 +38,5 @@ export type {
   AuthorUpdateBody,
   NewsInsertBody,
   CommentInsertBody,
+  DraftInsertBody,
 };

@@ -19,6 +19,7 @@ interface NewsUnderscored {
   main_image: string;
   aux_images: Array<string>;
   created_at: number;
+  is_draft: boolean;
 }
 
 interface News {
@@ -85,5 +86,8 @@ const mapNews = ({
   createdAt: created_at,
 });
 
-export type { News, NewsUnderscored, NewsRequest };
+type DraftUnderscored = NewsUnderscored;
+type DraftRequest = NewsRequest;
+
+export type { News, NewsUnderscored, NewsRequest, DraftUnderscored, DraftRequest };
 export { mapNews };
