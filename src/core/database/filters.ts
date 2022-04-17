@@ -42,9 +42,9 @@ type AuthorFilter = Draftable<{
   value: string;
 }>;
 
-interface NoFilter {
+type NoFilter = Draftable<{
   type: 'noFilter';
-}
+}>;
 
 type Filters =
   | TagFilter

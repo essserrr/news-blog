@@ -242,10 +242,10 @@ const selectAllByAuthor = ({ value, isDraft }: AuthorFilter) => `
       )
   `;
 
-// eslint-disable-next-line
-const selectAll = (_: NoFilter) => `
+const selectAll = ({ isDraft }: NoFilter) => `
   ${SelectAllParts.FILTERED} AS (
     SELECT ${NewsTable.ID} FROM ${Tables.NEWS}
+    WHERE ${NewsTable.IS_DRAFT}='${isDraft}'
   )
 `;
 

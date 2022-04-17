@@ -48,6 +48,7 @@ const filter = (filterOptions: Record<string, unknown>, isDraft: boolean = false
       const { categoryId: value } = validateReq({
         categoryId: category,
       });
+
       return { type: 'category', value, isDraft };
     }
     case title !== null: {
@@ -102,7 +103,7 @@ const filter = (filterOptions: Record<string, unknown>, isDraft: boolean = false
       return { type: 'author', value, isDraft };
     }
     default:
-      return { type: 'noFilter' };
+      return { type: 'noFilter', isDraft };
   }
 };
 
