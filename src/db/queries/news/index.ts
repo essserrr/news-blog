@@ -133,7 +133,7 @@ const news = {
   select: `
         WITH RECURSIVE
           ${Parts.BODY} AS ( 
-            SELECT * FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1
+            SELECT * FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1 AND ${NewsTable.IS_DRAFT}=$2
           ),
 
           ${Parts.IMAGES} AS (

@@ -31,7 +31,7 @@ const getNews =
   async (nid) => {
     logger.debug(`Getting news: ${nid}`);
 
-    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.select, [nid]);
+    const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.select, [nid, false]);
 
     const news = res.rows[0];
     if (!news) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });

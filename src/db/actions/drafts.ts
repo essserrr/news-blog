@@ -31,7 +31,7 @@ const getDraft =
   async (nid) => {
     logger.debug(`Getting draft: ${nid}`);
 
-    const res: QueryResult<DraftUnderscored> = await pool.query(queries.news.select, [nid]);
+    const res: QueryResult<DraftUnderscored> = await pool.query(queries.news.select, [nid, true]);
 
     const draft = res.rows[0];
     if (!draft) throw new AppError({ errorType: 'Database error', code: 'NOT_FOUND' });
