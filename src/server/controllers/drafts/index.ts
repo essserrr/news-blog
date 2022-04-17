@@ -5,23 +5,17 @@ import { authMiddleware, ProtectedMethods } from 'src/server/middleware/auth';
 import { add, get, update, remove, getAll } from './handlers';
 
 const protectedMethods: ProtectedMethods = {
-  /* POST: true,
+  POST: true,
   PUT: true,
-  DELETE: true, */
+  DELETE: true,
 };
 
 const initDraftsRouter = (app: App) => {
   const router = express.Router();
 
-  router.route('/').get(getAll(app));
+  router.use('/', authMiddleware(app, protectedMethods)).route('/').get(getAll(app));
 
-  router
-    .use('/:id', authMiddleware(app, protectedMethods))
-    .route('/:id')
-    .get(get(app))
-    .put(update(app))
-    .post(add(app))
-    .delete(remove(app));
+  router.route('/:id').get(get(app)).put(update(app)).post(add(app)).delete(remove(app));
 
   return router;
 };

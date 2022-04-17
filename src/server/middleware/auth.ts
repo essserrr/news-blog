@@ -38,7 +38,7 @@ const authAdminMiddleware: AuthMiddleware = (app, protectedMethods) => async (re
     }
 
     const authObject = await authenticate(app, req);
-    if (/* !!!!!! !authObject.isAdmin || */ !authObject.loggedIn)
+    if (!authObject.isAdmin || !authObject.loggedIn)
       throw new AppError({ code: 'FORBIDDEN', errorType: 'Admin auth error' });
 
     res.locals.auth = authObject;
@@ -60,6 +60,7 @@ const authMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, re
     }
 
     const authObject = await authenticate(app, req);
+    console.log(authObject);
     if (!authObject.loggedIn) throw new AppError({ code: 'FORBIDDEN', errorType: 'Auth error' });
 
     res.locals.auth = authObject;
