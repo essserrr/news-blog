@@ -28,6 +28,7 @@ import {
   checkDraftAuthor,
   removeDraft,
   getAllDraft,
+  publishDraft,
 } from './actions/drafts';
 import { addComment, getAllComments, removeComment, checkCommentAuthor } from './actions/comments';
 
@@ -94,6 +95,7 @@ const initDb = async (logger: Logger, config: DatabaseConfig): Promise<Database>
       update: updateDraft(instance),
       checkAuthor: checkDraftAuthor(instance),
       remove: removeDraft(instance),
+      publish: publishDraft(instance),
     },
 
     comments: {

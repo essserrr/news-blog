@@ -279,6 +279,11 @@ const news = {
     (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
   FROM ${Parts.BODY};`,
 
+  publish: `
+  UPDATE ${Tables.NEWS} SET
+    ${NewsTable.IS_DRAFT}='false'
+  WHERE (${NewsTable.ID}=$1 AND ${NewsTable.IS_DRAFT}='true');`,
+
   selectAll,
   selectAllDrafts,
 } as const;

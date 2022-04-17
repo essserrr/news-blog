@@ -111,6 +111,7 @@ interface Database {
     update: (nid: Uid, options: DraftRequest) => Promise<DraftUnderscored>;
     checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
     remove: (nid: Uid) => Promise<MessageResponse>;
+    publish: (nid: Uid) => Promise<MessageResponse>;
   };
   comments: {
     add: (options: CommentInsert) => Promise<Comment>;

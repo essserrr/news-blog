@@ -99,4 +99,23 @@ const removeDraft =
     };
   };
 
-export { addDraft, getDraft, updateDraft, checkDraftAuthor, removeDraft, getAllDraft };
+const publishDraft =
+  ({ logger, pool, queries }: DbInstance): Database['drafts']['publish'] =>
+  async (nid) => {
+    logger.debug(`Publishing draft: ${nid}`);
+    await pool.query(queries.news.publish, [nid]);
+
+    return {
+      message: 'Ok',
+    };
+  };
+
+export {
+  addDraft,
+  getDraft,
+  updateDraft,
+  checkDraftAuthor,
+  removeDraft,
+  getAllDraft,
+  publishDraft,
+};

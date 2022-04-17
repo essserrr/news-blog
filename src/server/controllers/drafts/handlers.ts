@@ -139,4 +139,20 @@ const getAll: Handler = (app) => async (req, res) => {
   }
 };
 
-export { add, get, update, remove, getAll };
+const publish: Handler = (app) => async (req, res) => {
+  try {
+    const { uid: nid } = validateQuery({ uid: req.params.id });
+
+    const { author: authorUid } = await app.db.drafts.checkAuthor(nid);
+    const { uid } = validateQuery({ uid: authorUid });
+    if (res.locals?.auth?.uid !== uid) throw new AppError({ code: 'FORBIDDEN' });
+
+    const data = await app.db.drafts.publish(nid);
+
+    res.send({ data });
+  } catch (e) {
+    respondWithError(app, res, getTypedError(e));
+  }
+};
+
+export { add, get, update, remove, getAll, publish };
