@@ -2,7 +2,7 @@ import { RequestHandler, Request } from 'express';
 
 import { AuthStatus } from 'src/core/auth';
 import { respondWithError } from 'src/core/server';
-import { AppError, getTypedError } from 'src/core/errors';
+import { AppError } from 'src/core/errors';
 import { validateQuery, validateReq } from 'src/core/validation';
 import { AuthCookies } from 'src/core/cookies-session';
 
@@ -65,7 +65,11 @@ const authMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, re
     res.locals.auth = authObject;
     next();
   } catch (e) {
-    respondWithError(app, res, getTypedError(e));
+    respondWithError(
+      app,
+      res,
+      new AppError({ code: 'FORBIDDEN', errorType: 'Auth error', originalError: e }),
+    );
   }
 };
 
