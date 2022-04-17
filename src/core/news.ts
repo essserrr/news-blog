@@ -14,7 +14,7 @@ interface NewsUnderscored {
   author: NewsAuthorUnderscored | null;
   title: string;
   content: string;
-  categories: Array<Category>;
+  category: Array<Category>;
   tags: Array<Tag>;
   main_image: string;
   aux_images: Array<string>;
@@ -27,7 +27,7 @@ interface News {
   author: NewsAuthor | null;
   title: string;
   content: string;
-  categories: Array<Category>;
+  category: Array<Category>;
   tags: Array<Tag>;
   mainImage: string;
   auxImages: Array<string>;
@@ -69,7 +69,7 @@ const mapNews = ({
   author,
   title,
   content,
-  categories,
+  category,
   tags,
   main_image,
   aux_images,
@@ -79,7 +79,7 @@ const mapNews = ({
   author: author ? mapNewsAuthor(author) : author,
   title,
   content,
-  categories,
+  category,
   tags,
   mainImage: main_image,
   auxImages: aux_images,
