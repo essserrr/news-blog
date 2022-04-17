@@ -32,7 +32,7 @@ const selectAllByTag = ({ filter, value, isDraft }: TagFilter) => {
   return `
     ${SelectAllParts.PRE_FILTERED} AS (
   
-      SELECT ${LOCAL_TABLE}.${TagsSubTable.NID} as ${NewsTable.ID} FROM
+      SELECT ${LOCAL_TABLE}.${TagsSubTable.NID} FROM
         (SELECT 
           ${TagsSubTable.NID}, count(${TagsSubTable.ID})
         FROM ${Tables.NEWS_TAGS}
@@ -163,7 +163,7 @@ const selectAllBySearch = ({ value, isDraft }: SearchFilter) => {
 
   const tagsNews = 'tag_n';
 
-  const categoriesLike = 'categories_l';
+  const categoriesNews = 'categories_n';
 
   return `
     ${authorsLike} AS (
@@ -200,17 +200,20 @@ const selectAllBySearch = ({ value, isDraft }: SearchFilter) => {
   
     ${tagsNews} AS (
       SELECT 
-        ${Tables.NEWS_TAGS}.${TagsSubTable.NID}
+        ${Tables.NEWS_TAGS}.${TagsSubTable.NID} AS ${NewsTable.ID}
       FROM ${Tables.TAGS}
   
   
       RIGHT JOIN ${Tables.NEWS_TAGS}
         ON ${Tables.NEWS_TAGS}.${TagsSubTable.ID} = ${Tables.TAGS}.${TagsTable.ID}
-  
+      RIGHT JOIN ${Tables.NEWS}
+        ON ${Tables.NEWS}.${NewsTable.ID} = ${Tables.NEWS_TAGS}.${TagsSubTable.NID} 
+
       WHERE lower(${Tables.TAGS}.${TagsTable.NAME}) LIKE('%${value}%') AND ${Tables.NEWS}.${NewsTable.IS_DRAFT}='${isDraft}'
     ),
-  
-    ${categoriesLike} AS (
+
+ 
+    ${categoriesNews} AS (
       SELECT 
         ${Tables.NEWS}.${NewsTable.ID}
       FROM ${Tables.CATEGORIES}
@@ -223,7 +226,7 @@ const selectAllBySearch = ({ value, isDraft }: SearchFilter) => {
     ),
   
     ${SelectAllParts.FILTERED} AS (
-      SELECT * FROM ${categoriesLike}
+      SELECT * FROM ${categoriesNews}
         UNION
       SELECT * FROM ${authorNews}
         UNION
