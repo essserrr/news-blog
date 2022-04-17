@@ -97,7 +97,7 @@ interface Database {
     }) => Promise<PaginatedResult<NewsUnderscored>>;
     update: (nid: Uid, options: NewsRequest) => Promise<NewsUnderscored>;
     checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
-    remove: (nid: Uid, uid: Uid) => Promise<MessageResponse>;
+    remove: (nid: Uid) => Promise<MessageResponse>;
   };
   drafts: {
     add: (options: DraftRequest) => Promise<DraftUnderscored>;
@@ -110,7 +110,7 @@ interface Database {
     }) => Promise<PaginatedResult<DraftUnderscored>>;
     update: (nid: Uid, options: DraftRequest) => Promise<DraftUnderscored>;
     checkAuthor: (nid: Uid) => Promise<CheckAuthor>;
-    remove: (nid: Uid, uid: Uid) => Promise<MessageResponse>;
+    remove: (nid: Uid) => Promise<MessageResponse>;
   };
   comments: {
     add: (options: CommentInsert) => Promise<Comment>;

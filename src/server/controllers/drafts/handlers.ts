@@ -110,7 +110,7 @@ const remove: Handler = (app) => async (req, res) => {
     const { uid } = validateQuery({ uid: authorUid });
     if (res.locals?.auth?.uid !== uid) throw new AppError({ code: 'FORBIDDEN' });
 
-    const data = await app.db.drafts.remove(nid, uid);
+    const data = await app.db.drafts.remove(nid);
 
     res.send({ data });
   } catch (e) {

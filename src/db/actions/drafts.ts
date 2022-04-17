@@ -63,7 +63,6 @@ const updateDraft =
 
     const res: QueryResult<DraftUnderscored> = await pool.query(queries.news.update, [
       nid,
-      author,
       title,
       content,
       category,
@@ -91,9 +90,9 @@ const checkDraftAuthor =
 
 const removeDraft =
   ({ logger, pool, queries }: DbInstance): Database['drafts']['remove'] =>
-  async (nid, uid) => {
+  async (nid) => {
     logger.debug(`Removing draft: ${nid}`);
-    await pool.query(queries.news.delete, [nid, uid]);
+    await pool.query(queries.news.delete, [nid]);
 
     return {
       message: 'Ok',

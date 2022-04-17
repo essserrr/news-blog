@@ -60,7 +60,6 @@ const authMiddleware: AuthMiddleware = (app, protectedMethods) => async (req, re
     }
 
     const authObject = await authenticate(app, req);
-    console.log(authObject);
     if (!authObject.loggedIn) throw new AppError({ code: 'FORBIDDEN', errorType: 'Auth error' });
 
     res.locals.auth = authObject;

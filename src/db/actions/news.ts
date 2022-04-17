@@ -63,7 +63,6 @@ const updateNews =
 
     const res: QueryResult<NewsUnderscored> = await pool.query(queries.news.update, [
       nid,
-      author,
       title,
       content,
       category,
@@ -91,9 +90,9 @@ const checkNewsAuthor =
 
 const removeNews =
   ({ logger, pool, queries }: DbInstance): Database['news']['remove'] =>
-  async (nid, uid) => {
+  async (nid) => {
     logger.debug(`Removing news: ${nid}`);
-    await pool.query(queries.news.delete, [nid, uid]);
+    await pool.query(queries.news.delete, [nid]);
 
     return {
       message: 'Ok',

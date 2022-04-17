@@ -194,17 +194,17 @@ const news = {
           (SELECT json_agg(${tagsFullPart.ALL}) FROM ${Parts.TAGS_FULL}) AS ${NewsFields.TAGS}
         FROM ${Parts.BODY};`,
 
-  delete: `DELETE FROM ${Tables.NEWS} WHERE (${NewsTable.ID}=$1 AND ${NewsTable.AUTHOR}=$2);`,
+  delete: `DELETE FROM ${Tables.NEWS} WHERE ${NewsTable.ID}=$1;`,
 
   update: `
   WITH RECURSIVE
     ${Parts.BODY} AS ( 
         UPDATE ${Tables.NEWS} SET
-          ${NewsTable.TITLE}=$3, 
-          ${NewsTable.CONTENT}=$4, 
-          ${NewsTable.CATEGORY}=$5, 
-          ${NewsTable.MAIN_IMAGE}=$6
-        WHERE (${NewsTable.ID}=$1 AND ${NewsTable.AUTHOR}=$2) RETURNING *
+          ${NewsTable.TITLE}=$2, 
+          ${NewsTable.CONTENT}=$3, 
+          ${NewsTable.CATEGORY}=$4, 
+          ${NewsTable.MAIN_IMAGE}=$5
+        WHERE ${NewsTable.ID}=$1 RETURNING *
       ),
 
     clear_tags AS (
@@ -213,7 +213,7 @@ const news = {
 
     ${Parts.TAGS} AS (
       INSERT INTO ${Tables.NEWS_TAGS} (${TagsSubTable.NID}, ${TagsSubTable.ID}) 
-      SELECT ${bodyPart.ID}, unnest($7::integer[]) FROM ${Parts.BODY} 
+      SELECT ${bodyPart.ID}, unnest($6::integer[]) FROM ${Parts.BODY} 
       RETURNING ${TagsSubTable.ID}
     ),
 
@@ -255,7 +255,7 @@ const news = {
 
     ${Parts.IMAGES} AS (
       INSERT INTO ${Tables.NEWS_IMAGES} (${ImagesSubTable.NID}, ${ImagesSubTable.PATH}) 
-      SELECT ${bodyPart.ID}, unnest($8::text[]) FROM ${Parts.BODY} 
+      SELECT ${bodyPart.ID}, unnest($7::text[]) FROM ${Parts.BODY} 
       RETURNING ${ImagesSubTable.PATH}
     ),
 
