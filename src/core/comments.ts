@@ -1,5 +1,5 @@
 interface Comment {
-  id: number;
+  id: string;
   uid: string | null;
   nid: string;
   message: string | null;
