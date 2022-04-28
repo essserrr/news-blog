@@ -18,6 +18,8 @@ type AuthorUpdateBody = Partial<AuthorWithoutUid>;
 
 type CommentInsertBody = Omit<Comment, 'id' | 'nid'>;
 
+type AuthBody = Pick<User, 'password'>;
+
 interface NewsInsertBody {
   title: string;
   content: string;
@@ -39,4 +41,5 @@ export type {
   NewsInsertBody,
   CommentInsertBody,
   DraftInsertBody,
+  AuthBody,
 };

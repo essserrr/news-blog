@@ -2,6 +2,7 @@ import { Request } from 'express';
 import { compare } from 'bcrypt';
 
 import { AuthStatus } from 'src/core/auth';
+import { AuthBody } from 'src/core/remote-client';
 import { respondWithError } from 'src/core/server';
 import { AppError, getTypedError } from 'src/core/errors';
 import { App } from 'src/core/app';
@@ -12,7 +13,7 @@ import type { AuthMiddleware, ProtectedMethods } from './auth';
 const login = async (app: App, req: Request): Promise<AuthStatus> => {
   const { username } = validateQuery({ username: req.params.id });
 
-  const { password } = req.body || {};
+  const { password }: AuthBody = req.body || {};
   const { password: passwordValidated } = validateReq({ password });
   app.logger.debug(`Log in attempt from: ${username}`);
 
