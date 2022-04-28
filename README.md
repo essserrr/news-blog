@@ -6,7 +6,7 @@
 
 1. PostgreSQL 13
 2. Node 16
-3. .env.dev file
+3. .env.dev file in root folder
 
 ```
 NODE_PATH=./
@@ -18,3 +18,8 @@ DATABASE_SSL=false
 
 SECRET_COOKIES_KEY=super_secret_key
 ```
+
+### Quick start
+
+1. yarn
+1. yarn dev
