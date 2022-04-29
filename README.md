@@ -1,6 +1,6 @@
 ### Documentation
 
-[API documentation](https://github.com/essserrr/test-api)
+[API documentation](https://github.com/essserrr/test-api) or [Probably needs registration](https://hot-sloth-90.redoc.ly/)
 
 ### Requirements
 
